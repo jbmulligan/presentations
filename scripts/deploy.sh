@@ -20,3 +20,24 @@ fi
 
 cp $presentation_dir/*.htm $target_dir
 
+# Now copy the images
+
+if [[ -e $presentation_dir/find_media.shf ]]; then
+	cd $presentation_dir
+	./find_media.shf
+	while read filename; do
+		parent_dir=`dirname $filename`
+		subdir=`basename $parent_dir`
+		grandparent_dir=`dirname $parent_dir`
+		slide_dir=`basename $grandparent_dir`
+		if [[ ! -e ../docs/$slide_dir ]]; then
+			mkdir ../docs/$slide_dir
+			mkdir ../docs/$slide_dir/$subdir
+		elif [[ ! -e ../docs/$slide_dir/$subdir ]]; then
+			mkdir ../docs/$slide_dir/$subdir
+		fi
+		cp $filename ../docs/$slide_dir/$subdir
+	done < image_files.txt
+fi
+
+
