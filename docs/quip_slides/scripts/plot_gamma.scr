@@ -1,0 +1,33 @@
+< $macro_dir/view/plotsupp.mac
+< plot_gamma.mac
+
+New_Plotter plot_v 400 400
+Assign_Margins 
+Plot_Data_Range 0 0 256 1
+
+Declare_Tables
+
+
+Pause
+
+Erase_Plot
+Plot_Frame
+
+Define Doit 2 filename color
+Process_File $1
+Plot_Fit $2
+Cleanup_Fit
+Pause
+.
+
+Doit results.native_res.asc $black
+Doit results.native.green.asc $green
+Doit results.native.blue.asc $blue
+Doit results.native.red.asc $red
+
+Pause
+
+Save_Plot gamma_meas_combined.png
+
+exit
+

@@ -1,0 +1,18 @@
+
+#Set infile two_bills.jpg
+#Set n_crop 100
+
+Set infile color_match2.jpg
+Set n_crop 10
+
+Read_File_Header $infile
+Image rgb nrows($infile) ncols($infile) 3 u_byte
+Get_Next rgb $infile
+
+Subimage inset rgb ncols(rgb) nrows(rgb)-$n_crop 0 0
+
+Clobber yes
+Write_File_Header out.jpg 1
+Put_Next inset out.jpg
+
+exit

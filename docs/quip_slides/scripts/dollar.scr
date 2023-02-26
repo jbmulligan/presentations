@@ -1,0 +1,82 @@
+
+Viewer bg_v ncols('$DISPLAY') nrows('$DISPLAY')
+Image bg nrows(bg_v) ncols(bg_v) 3 u_byte
+VSet bg 0
+Show_Bytes bg bg_v
+
+Viewer dollar_v 800 400
+Set y0 10
+Posn_Window dollar_v 100 $y0
+
+Image rgb nrows(dollar_v) ncols(dollar_v) 3 u_byte
+
+Set dollar_w 485
+Set dollar_h 247
+
+Set dollar_r 129
+Set dollar_g 79
+Set dollar_b 0
+
+Define SetWidth 0
+Set dollar_w $slider_val
+Update_Size
+.
+
+Define SetHeight 0
+Set dollar_h $slider_val
+Update_Size
+.
+
+Define Update_Size 0
+Assign x0 floor((ncols(dollar_v)-$dollar_w)/2)
+Assign y0 floor((nrows(dollar_v)-$dollar_h)/2)
+Subimage inset rgb $dollar_w $dollar_h $x0 $y0
+VSet rgb{0} $dollar_b
+VSet rgb{1} $dollar_g
+VSet rgb{2} $dollar_r
+VSet inset 0
+Delete_Image inset
+Show_Bytes rgb dollar_v
+.
+
+Define SetRed 0
+Set dollar_r $slider_val
+Update_Size
+.
+
+Define SetGreen 0
+Set dollar_g $slider_val
+Update_Size
+.
+
+Define SetBlue 0
+Set dollar_b $slider_val
+Update_Size
+.
+
+interface
+  panel dollar_panel ncols(dollar_v) 260
+  decorate dollar_panel
+    position 0 0
+    adjuster width SetWidth 100 ncols(dollar_v) $dollar_w
+    adjuster height SetHeight 100 nrows(dollar_v) $dollar_h
+    button QUIT exit
+    position 350 0
+    adjuster Red SetRed 0 255 $dollar_r
+    adjuster Green SetGreen 0 255 $dollar_g
+    adjuster Blue SetBlue 0 255 $dollar_b
+    #Pause
+    quit
+  control
+    show dollar_panel
+    quit
+  quit
+Posn_Window dollar_panel 100 $y0+nrows(dollar_v)+34
+
+Update_Size
+Show_Bytes bg bg_v
+do
+  os events quit
+  while 1
+
+

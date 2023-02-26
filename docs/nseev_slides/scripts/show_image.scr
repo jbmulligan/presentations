@@ -1,0 +1,18 @@
+
+If $argc!=4 "error_exit 'usage:  vt filename viewer_name x0 y0 < show_image.scr'"
+
+Set infile $1
+Set viewer_name $2
+Set x0 $3
+Set y0 $4
+
+Read_File_Header $infile
+Dup_UByte b1 $infile
+Viewer_For $viewer_name b1
+Posn_Window $viewer_name $x0 $y0
+Get_Next b1 $infile
+Show_Bytes b1 $viewer_name
+
+Wait_For_Click
+exit
+

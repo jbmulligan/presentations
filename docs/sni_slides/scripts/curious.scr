@@ -1,0 +1,22 @@
+#
+# Display book quotation image
+
+Set d $HOME/working/public_html/home/presentations/sni_slides/images
+
+Hips_Read_Directory $d
+
+Set f curious.jpg
+Read_File_Header $f
+Dup_UByte img1 $f
+Get_Next img1 $f
+
+Viewer_For v1 img1
+Posn_Window v1 330 40
+Label_Viewer v1 'from "The curious incident of the dog in the night-time" by Mark Haddon (2003)'
+
+Show_Bytes img1 v1
+
+do
+  os events quit
+  usleep 333
+  while 1

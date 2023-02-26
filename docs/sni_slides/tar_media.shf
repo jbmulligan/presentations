@@ -1,0 +1,7 @@
+#
+# this does ALL the media
+#tar cvfz media.tgz ./images/*.jp*g ./images/*.gif ./movies/*.mpg ./movies/*.jp*g
+
+# this does just the images (because some are used by emc_slides)
+tar cvfz ~/sni_images.tgz ./images/*.jp*g ./images/*.gif
+

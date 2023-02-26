@@ -1,0 +1,25 @@
+Set f aic89_maloney.png
+Set f2 aic89_maloney_highlighted.png
+
+Read_File_Header $f
+Assign w ncols('$f')
+Assign h nrows('$f')
+Image rgb $h $w 4 u_byte
+Get_Next rgb $f
+
+Set x0 20
+Set y0 630
+Set dx 2250
+Set dy 90
+Subimage region rgb $dx $dy $x0 $y0
+VSet region{2} 0
+
+Viewer_For v rgb
+Show_Bytes rgb v
+
+Clobber yes
+Write_File_Header $f2 1
+Put_Next rgb $f2
+
+Pause
+

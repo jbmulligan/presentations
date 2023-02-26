@@ -1,0 +1,24 @@
+# trim the bottom from an image
+
+If $argc!=1 "error_exit 'usage:  coq n_trim < crop_simple.scr'"
+
+Set infile simple_problem.png
+If !file_exists('$infile') "error_exit 'File $infile does not exist'"
+
+Read_File_Header $infile
+Dup_UByte b $infile
+Get_Next b $infile
+
+Subimage s b ncols(b) nrows(b)-$1 0 0
+
+Set outfile simple_problem1.png
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next s $outfile
+
+Viewer_For v s
+Show_Bytes s v
+Pause
+
+exit
+

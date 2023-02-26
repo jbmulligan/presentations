@@ -1,0 +1,7 @@
+#
+# do nothing
+
+cd $HOME/working/public_html/home/presentations/galvo_slides/mov
+jpsee movieDemo.ROOT.jpg SPEED >& /dev/null
+
+

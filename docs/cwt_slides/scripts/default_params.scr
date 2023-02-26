@@ -1,0 +1,9 @@
+
+Set lp_sigma 4
+Set s_period 128
+Set t_period 20
+Set h_shear_amp 1
+Set v_comp_amp 0
+Set v_shear_amp 0
+Set h_comp_amp 0
+

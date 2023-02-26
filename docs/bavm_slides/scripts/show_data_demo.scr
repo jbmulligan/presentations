@@ -1,0 +1,40 @@
+#
+Set dir $HOME/pl4/movies
+Set file s1.hips2
+
+Set skip 3
+
+Hips_Read_Directory $dir
+Read_File_Header $file
+
+Assign h nrows('$file')
+Assign w ncols('$file')
+Image b $h $w 1 u_byte
+Image bb 2*nrows('$file') 2*ncols('$file') 1 u_byte
+Image f nrows('$file') ncols('$file') 1 float
+
+Viewer v 2*ncols('$file') 2*nrows('$file')
+
+Define Click 0
+# only exit on up-click
+If $left_button_up&&$middle_button_up&&$right_button_up
+exit
+.
+
+Set_Button_Actions v Click Click Click
+#Pause
+
+repeat nframes('$file')
+  Get_Next b $file
+  Set i $skip
+  do
+    os events quit
+    Get_Next b $file
+    Decrement i
+    while $i>0
+
+  Enlarge bb b
+  #Convert 
+  Show_Bytes bb v
+  end
+

@@ -1,0 +1,46 @@
+
+If $argc!=2 "error_exit 'usage:  coq n_trim file_index < trim.scr'"
+
+Set n_trim $1
+
+Define Trim_Orig 0
+
+Set infile orig_powers6.png
+Set outfile matrix_powers6.png
+Read_File_Header $infile
+Image b nrows('$infile') ncols('$infile') depth('$infile') u_byte
+Get_Next b $infile
+Subimage s b ncols(b)-$n_trim nrows(b) $n_trim 0
+
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next s $outfile
+.
+
+If $2>=6 "error_exit 'File index must be less than 6'"
+
+Set infile matrix_powers6.png
+Set outfile matrix_powers$2.png
+
+advise "Reading $infile header..."
+Read_File_Header $infile
+Image b nrows('$infile') ncols('$infile') depth('$infile') u_byte
+advise "Fetching image data..."
+Get_Next b $infile
+Subimage s b ncols(b)-$n_trim nrows(b) 0 0
+
+advise "Creating viewer v..."
+Viewer_For v s
+advise "Displaying trimmed subimage..."
+Show_Bytes s v
+
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next s $outfile
+
+Pause
+
+
+exit
+
+

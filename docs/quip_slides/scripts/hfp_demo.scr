@@ -1,0 +1,30 @@
+
+max_warnings 3
+
+< $macro_dir/view/plotsupp.mac	# get color defs
+< adjuster.mac
+< hfp_demo.mac
+
+view quit	# init default display
+
+# use New_Plotter instead of Viewer to install color defs
+
+Declare_Images
+Paint_Strips key_strips
+Setup_Luts
+Map_Stripes
+
+Init_Demo_Viewers
+Draw_Adjuster_Arrows $yellow $red $green
+HFP_Panel
+
+Show_Bytes key_frm key_v
+
+# There is a trick to checking events within an event driven macro!?
+# what is it???
+
+do
+  os events quit
+  Cycle_It 1 $delay
+  while 1
+

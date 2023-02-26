@@ -1,0 +1,32 @@
+
+Filetype raw
+#Raw_Image_Dimensions 3 640 480 450
+Raw_Image_Dimensions 1 320 240 3*500
+Set infile jbm.raw
+Hips_Read_Directory $HOME/pl2/movies
+Read_File_Header $infile
+#fileio info $infile quit
+
+Image frame 240 320 1 u_byte
+Viewer_For v1 frame
+Viewer_For v2 frame
+Viewer_For v3 frame
+Posn_Viewer v1 50 50
+Posn_Viewer v2 450 50
+Posn_Viewer v3 250 350
+
+Set skip 0
+
+repeat 500
+  Get_Next frame $infile
+  Show_Bytes frame v1
+  Get_Next frame $infile
+  Show_Bytes frame v2
+  Get_Next frame $infile
+  Show_Bytes frame v3
+  end
+
+exit
+
+#< /dev/tty
+

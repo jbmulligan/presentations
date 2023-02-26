@@ -1,0 +1,80 @@
+# pathgen test
+
+< $macro_dir/atc/atc.mac
+
+Set show_human_time	0
+Set pausing		1
+Set showing		1
+
+If $showing Init_Default_Screen
+Init_Default_Strategies
+
+Set ctime	100
+Define Do_Set 2 nplanes ctime
+#	nplanes cnfl t	sm ang	sm xys	fixed routes	no alt restrictions
+Trial	$1	$2	yes	yes	no		yes
+Trial	$1	$2	yes	yes	no		no
+Trial	$1	$2	yes	no	no		yes
+Trial	$1	$2	yes	no	no		no
+Trial	$1	$2	no	yes	no		yes
+Trial	$1	$2	no	yes	no		no
+Trial	$1	$2	no	no	no		yes
+Trial	$1	$2	no	no	no		no
+.
+
+Define Wait_For_ATC_Click 0
+atc
+  stimuli
+    wait_for_click
+    quit
+  quit
+.
+
+Define Trial 6 nplanes ctime smang smxys fixed altres
+atc pathgen trial $1 $2 $3 $4 $5 $6 quit quit
+
+#Pause_If
+#Wait_For_ATC_Click
+
+#If $altclr
+#  Then "Altcolor yes"
+#  Else "Altcolor no"
+Altcolor no
+Run_Model
+#advise "Conflict FOUND after $n_model_fixations fixations"
+#Pause_If
+#Wait_For_ATC_Click
+
+Altcolor yes
+Run_Model
+#advise "Conflict FOUND after $n_model_fixations fixations"
+#Pause_If
+#Wait_For_ATC_Click
+
+.
+
+Strategy smart_random
+
+Define Doit 2 n altclr
+Set altclr $2
+#error_file /u/jbm/dalton/atc/data/Res.$1.$2
+#repeat 50
+repeat 5
+  Do_Set $1 200
+  end
+.
+
+Mem_Params mem_hd1.asc mem_alt1.asc mem_spd1.asc
+#Mem_Params mem_1.asc mem_1.asc mem_1.asc
+Doit 12 0
+Doit 14 0
+Doit 16 0
+Doit 18 0
+Doit 20 0
+
+Doit 12 1
+Doit 14 1
+Doit 16 1
+Doit 18 1
+Doit 20 1
+

@@ -1,0 +1,8 @@
+#Set s_period 128
+#Recompute_Modulator
+#Set lp_sigma 4
+#Recompute_Texture
+Set v_comp_amp 0
+Set h_comp_amp 0
+Set h_shear_amp 1
+Set v_shear_amp 1

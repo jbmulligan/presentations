@@ -1,0 +1,22 @@
+
+Filetype raw
+#Raw_Image_Dimensions 3 640 480 450
+Raw_Image_Dimensions 3 640 480 225
+Set infile lee2.raw
+Read_File_Header $infile
+
+Image frame 480 640 3 u_byte
+Viewer_For v frame
+
+Set skip 0
+
+#repeat 450/($skip+1)
+repeat 200
+  repeat $skip+1
+    Get_Next frame $infile
+    end
+  Show_Bytes frame v
+  end
+
+exit
+

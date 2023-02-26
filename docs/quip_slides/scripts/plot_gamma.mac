@@ -1,0 +1,163 @@
+
+Define Plot_Frame 0
+Y_Legend "relative luminance"
+X_Legend setting
+Plot_X_Axis 0 256 64 0
+Plot_Y_Axis 0 1 0.25 0
+Label_X_Ticks 0 256 64
+Label_Y_Ticks 0 1 0.25
+.
+
+Define Declare_Tables 0
+Set n_lut_entries 1024
+Vector gamma_lut $n_lut_entries 1 float
+Vector forward_lut 256 1 float
+.
+
+Define Init_Tables 0
+VSet gamma_lut -1	# indicates no data
+VSet gamma_lut[0] 0
+VSet gamma_lut[$n_lut_entries-1] 255
+VSet forward_lut -1
+VSet forward_lut[0] 0
+VSet forward_lut[255] 1
+.
+
+Define Record_Bisection 3 low_setting high_setting midpoint_setting
+#advise "Record_Bisection $1 $2 $3 BEGIN"
+# first get the luminances of the low and high settings
+Assign lum1 value(forward_lut[$1])
+Assign lum2 value(forward_lut[$2])
+Assign midpoint ($lum1+$lum2)/2
+VSet forward_lut[$3] $midpoint
+# get the indices into the gamma correction table
+Assign index1 round($lum1*($n_lut_entries-1))
+Assign index2 round($lum2*($n_lut_entries-1))
+Assign index3 round($midpoint*($n_lut_entries-1))
+#advise 'setting gamma_lut'
+VSet gamma_lut[$index1] $1
+VSet gamma_lut[$index2] $2
+VSet gamma_lut[$index3] $3
+.
+
+Define Plot_Fit 1 color
+Select_Pen $black
+XYPlot fit
+Legend_Font
+Assign gamma round($gamma*100)/100	# two decimals
+#S_At "gamma = $gamma" 40 0.85
+Unit_Font
+#S_At "laptop LCD, non-native 1024x768" 40 0.95
+S_At "laptop LCD, native 1680x1050" 40 0.95
+#S_At "green only" 40 0.75
+#Select_Pen $red
+Select_Pen $1
+Symbol_Plot pts
+.
+
+Define Save_Plot 1 filename
+Image rgb nrows(plot_v) ncols(plot_v) 3 u_byte
+view extract rgb plot_v 0 0 quit
+Rotate_Colors rgb
+Clobber yes
+Write_File_Header $1 1
+Put_Next rgb $1
+.
+
+Define Plot_Forward 1 index
+Assign x $1
+Assign y value(forward_lut[$x])
+#advise "Point at $x $y"
+data ascii read pts[$i_plot] - $x $y quit quit
+Increment i_plot
+.
+
+Define Scan_Data 0
+Set i 0
+repeat $n_obs
+  Assign low value(gamma_data[$i]{0})
+  Assign high value(gamma_data[$i]{1})
+  Assign mid value(gamma_data[$i]{2})
+  Record_Bisection $low $high $mid
+  Increment i
+  end
+
+# Now plot the points...
+Set i 0
+Set i_plot 0
+Vector pts $n_obs+2 2 float
+repeat ncols(forward_lut)
+  If value(forward_lut[$i])>=0 "Plot_Forward $i"
+  Increment i
+  end
+.
+
+Define Plot_Pts 0
+Symbol Disk 6
+Select_Pen $red
+Symbol_Plot pts
+.
+
+Define Compute_Fit 1 gamma
+VMov fit_pts{0} pts{0}
+VSMul fit_pts{1} fit_pts{0} 1/255
+VSPow fit_pts{1} fit_pts{1} $1
+VVSub fit_pts{0} fit_pts{1} want_pts{1}
+VVMul fit_pts{0} fit_pts{0} fit_pts{0}
+Get_Sum sos fit_pts{0}
+Assign error sqrt($sos/ncols(fit_pts))
+#advise "gamma = $1    error = $error"
+
+VSMul fit{1} fit{0} 1/255
+VSPow fit{1} fit{1} $1
+#XYPlot fit
+.
+
+Define Setup_Fit 0
+# Now fit the data with a power function...
+Dup_Float want_pts pts
+VSMul want_pts{0} pts{0} 1/255
+VMov want_pts{1} pts{1}
+Dup_Float fit_pts pts
+VMov fit_pts{0} pts{0}
+
+Vector fit 256 2 float
+Ramp1D fit{0} 0 1
+.
+
+Define Cleanup_Fit 0
+Delete_Image fit
+Delete_Image fit_pts
+Delete_Image want_pts
+Delete_Image pts
+Delete_Image gamma_data
+.
+
+Define Try_Gamma 0
+Compute_Fit $gamma
+.
+
+Define Estimate_Gamma 0
+stepit
+  package cstepit
+  function Try_Gamma
+  parameters 1
+    gamma 1 0.8 3.5 0.1 0.001
+  optimize
+  quit
+.
+
+Define Process_File 1 filename
+Set infile $1
+Count_Lines n_obs $infile
+Vector gamma_data $n_obs 3 float
+Get_Ascii gamma_data $infile
+#Display gamma_data
+
+Init_Tables
+Scan_Data
+Plot_Pts
+Setup_Fit
+Estimate_Gamma
+.
+

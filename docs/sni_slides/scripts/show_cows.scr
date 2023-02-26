@@ -1,0 +1,45 @@
+#
+Hips_Read_Directory $HOME/working/public_html/home/presentations/sni_slides/images
+Set f1 cattle4.jpg
+Set f2 cows3.jpg
+
+Read_File_Header $f1
+Dup_UByte img1 $f1
+Get_Next img1 $f1
+Rotate_Colors img1
+
+
+Read_File_Header $f2
+Dup_UByte img2 $f2
+Get_Next img2 $f2
+Rotate_Colors img2
+
+Dup_UByte img3 img1
+VSet img3 0
+
+Viewer_For v img1
+Posn_Window v 300 100
+
+Set d1 500000
+Set d2 1000000
+
+repeat 5
+  Show_Bytes img1 v
+  usleep $d1
+  Show_Bytes img3 v
+  usleep $d2
+  Show_Bytes img2 v
+  usleep $d1
+  Show_Bytes img3 v
+  usleep $d2
+  end
+
+repeat 5
+  Show_Bytes img1 v
+  usleep $d1+$d2
+  Show_Bytes img2 v
+  usleep $d1+$d2
+  end
+
+exit
+

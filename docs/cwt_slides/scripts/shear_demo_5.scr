@@ -1,0 +1,4 @@
+Set s_period 128
+Recompute_Modulator
+#Set lp_sigma 64
+#Recompute_Texture

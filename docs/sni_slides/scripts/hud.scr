@@ -1,0 +1,43 @@
+#!/export/home/localhost/jbm/bin/vt
+#
+# Display pictures of Lee and Brent...
+
+Set x0	400
+Set y0	100
+Set gap 40
+
+Set d $HOME/working/public_html/home/presentations/sni_slides/images
+
+Hips_Read_Directory $d
+
+Set f hud1.jpg
+Read_File_Header $f
+Dup_UByte img1 $f
+
+Get_Next img1 $f
+Rotate_Colors img1
+
+Set f hud2.jpg
+Read_File_Header $f
+Dup_UByte img2 $f
+
+Get_Next img2 $f
+Rotate_Colors img2
+
+Viewer_For v2 img2
+Posn_Window v2 $x0 $y0+nrows(img1)+$gap
+
+
+Label_Viewer v2 "Situational guidance"
+
+Viewer_For v1 img1
+Posn_Window v1 $x0 $y0
+Label_Viewer v1 "Command guidance"
+
+Show_Bytes img1 v1
+Show_Bytes img2 v2
+
+do
+  os events quit
+  usleep 333
+  while 1

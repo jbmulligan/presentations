@@ -1,0 +1,56 @@
+# vt script to show valerie
+
+Set raw_file /home/jbm/public_html/home/movies/mvi3.raw
+If !var_exists(PAUSING) "Set PAUSING 0"
+Set pausing $PAUSING
+
+If !file_exists('$raw_file') "error_exit 'File $raw_file does not exist'"
+
+#verbose yes
+
+Filetype raw
+fileio raw_sizes 3 720 480 98 1 quit
+Read_File_Header $raw_file
+#fileio info $raw_file quit
+
+Image frame nrows('$raw_file') ncols('$raw_file') ncomps('$raw_file') u_byte
+
+Assign depth ncomps('$raw_file')
+
+Define Mono_Viewer 0
+#advise Mono_Viewer
+#Info field
+Viewer_For v frame
+Posn_Viewer v 350 150
+Protect_LUT 0
+Grayscale_Viewer v
+.
+
+# "mono" viewer will display color on a 24 bit display
+Mono_Viewer
+
+Assign vd depth('$DISPLAY')
+
+Define Show_Movie 0
+Set frameno 1
+Assign nf nframes('$raw_file')
+os get_time start_time quit
+repeat nframes('$raw_file')
+  Get_Next frame $raw_file
+
+  Show_Bytes frame v
+
+  Label_Viewer v "$raw_file, frame $frameno"
+
+  Pause_If
+  Increment frameno
+  end
+os get_time end_time quit
+Assign elapsed_time $end_time-$start_time
+Assign fps $frameno/$elapsed_time
+#advise "$frameno frames shown, elapsed time $elapsed_time seconds ($fps fps)"
+.
+
+Show_Movie
+
+exit

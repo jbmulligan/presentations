@@ -1,0 +1,39 @@
+
+#max_warnings 3
+max_warnings -1
+
+< $macro_dir/view/plotsupp.mac	# get color defs
+#< $macro_dir/proto/ui.mac	# get color defs
+< $macro_dir/gui/ui.mac	# get color defs
+< adjuster.mac
+< gamma_demo.mac
+
+view quit	# init default display
+
+# use New_Plotter instead of Viewer to install color defs
+
+Declare_Images
+
+Paint_Strips strips
+Paint_Strips key_strips
+Setup_Luts 0 255 127
+
+Map_Stripes
+
+
+Init_Demo_Viewers
+Draw_Adjuster_Arrows $gray $black $white
+Draw_Adjuster_Disk $green
+Gamma_Panel
+
+Show_Bytes key_frm key_v
+
+# There is a trick to checking events within an event driven macro!?
+# what is it???
+
+do
+  os events quit
+  If $in_protocol Check_Protocol
+  Cycle_It 1 $delay
+  while 1
+

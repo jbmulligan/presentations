@@ -1,0 +1,23 @@
+# vt script to display the mug shots of Jeff holding the test object
+
+Set file1 ball_array_frontal.jpg
+Set file2 ball_array_profile.jpg
+
+Hips_Read_Directory ../images
+Read_File_Header $file1
+Read_File_Header $file2
+
+Dup_UByte rgb $file1		# we happen to know the images are the same size
+
+Viewer_For side_view rgb
+Posn_Viewer side_view 1023-(ncols(rgb)+20) 0
+Viewer_For front_view rgb
+Posn_Viewer front_view 1023-(2*(ncols(rgb)+20)) 0
+
+Get_Next rgb $file1
+Show_Bytes rgb front_view
+Get_Next rgb $file2
+Show_Bytes rgb side_view
+
+Wait_For_Up_Click
+

@@ -1,0 +1,39 @@
+#!/bin/csh
+#
+# Display pictures of Lee and Brent...
+
+Set d $HOME/working/public_html/home/presentations/sni_slides/images
+
+Hips_Read_Directory $d
+
+Set f lss4.jpg
+Read_File_Header $f
+Dup_UByte img1 $f
+
+Get_Next img1 $f
+Rotate_Colors img1
+
+Set f brb3.jpg
+Read_File_Header $f
+Dup_UByte img2 $f
+
+Get_Next img2 $f
+Rotate_Colors img2
+
+Viewer_For v1 img1
+Viewer_For v2 img2
+Set_Button_Actions v1 exit exit exit
+Set_Button_Actions v2 exit exit exit
+Posn_Window v1 230 400
+Posn_Window v2 640 40
+
+Label_Viewer v1 "Lee Stone"
+Label_Viewer v2 "Brent Beutter"
+
+Show_Bytes img1 v1
+Show_Bytes img2 v2
+
+do
+  os events quit
+  usleep 333
+  while 1

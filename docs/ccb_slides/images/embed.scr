@@ -1,0 +1,67 @@
+# embed a small image in a big one
+
+#Set file1 sa1.png
+#Set file2 mark_twain2.png
+#Set outfile sa2.png
+
+Set file1 sa2.png
+Set file2 sa_quote2.png
+Set outfile sa3.png
+
+Read_File_Header $file1
+Read_File_Header $file2
+
+Image big nrows('$file1') ncols('$file1') depth('$file1') u_byte
+Image small nrows('$file2') ncols('$file2') depth('$file2') u_byte
+
+Get_Next big $file1
+Get_Next small $file2
+Display small
+
+# put a black border around the inset
+Set border_thickness 6
+Set border_value 0
+Set alpha_value 255
+Subimage top small ncols(small) $border_thickness 0 0
+VSet top $border_value
+VSet top{3} $alpha_value
+Delete_Image top
+Subimage bot small ncols(small) $border_thickness 0 nrows(small)-$border_thickness
+VSet bot $border_value
+VSet bot{3} $alpha_value
+Delete_Image bot
+Subimage left small $border_thickness nrows(small) 0 0
+VSet left $border_value
+VSet left{3} $alpha_value
+Delete_Image left
+Subimage right small $border_thickness nrows(small) ncols(small)-$border_thickness 0
+VSet right $border_value
+VSet right{3} $alpha_value
+Delete_Image right
+
+Viewer_For v big
+Show_Bytes big v
+Pause
+
+# reduce contrast of big
+Set cfactor 3
+Dup_Float fbig big
+Convert fbig big
+VSAdd fbig fbig ($cfactor-1)*255
+VSMul fbig fbig 1/$cfactor
+Convert big fbig
+
+# for Mark Twain
+#Subimage inset big ncols(small) nrows(small) ncols(big)-ncols(small)-100 50
+# for wikipedia quote
+Subimage inset big ncols(small) nrows(small) 100 100
+VMov inset small
+Show_Bytes big v
+
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next big $outfile
+Pause
+
+exit
+

@@ -1,0 +1,15 @@
+Set infile xcorr_eqn2.png
+Read_File_Header $infile
+Dup_UByte b $infile
+Get_Next b $infile
+Assign w round(0.58*ncols(b))
+Subimage s b $w nrows(b) 0 0
+
+Viewer_For v s
+Show_Bytes s v
+
+Set outfile xcorr_eqn1.png
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next s $outfile
+Pause

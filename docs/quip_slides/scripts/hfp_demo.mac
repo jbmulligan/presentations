@@ -1,0 +1,121 @@
+
+# use New_Plotter instead of Viewer to install color defs
+
+Define HFP_Panel 0
+interface
+  panel stim_panel $panel_w $panel_h
+  decorate stim_panel
+    button Slow_Cycle SlowCycle
+    #button Fast_Cycles FastCycles
+    adjuster R SetRed 0 255 255
+    adjuster G SetGreen 0 255 255
+    toggle VBL_Sync TogVBL
+    set_toggle VBL_Sync yes
+    adjuster delay SetDelay 1 8 3
+    button QUIT exit
+    quit
+  control
+    show stim_panel
+    quit
+Posn_Window stim_panel $left_x $top_y
+.
+
+Define Declare_Images 0
+
+Image key_strips $key_h $key_w 1 u_byte
+
+Vector stripe_lut 256 3 u_byte
+Subvector use_lut stripe_lut 2 0
+
+Image frm1 $stim_h $stim_w 3 u_byte
+Image frm2 $stim_h $stim_w 3 u_byte
+Image key_frm $key_h $key_w 3 u_byte
+
+Set stripe_width 32
+Assign strip_width $stripe_width
+.
+
+Define Paint_Strips 1 image
+Set strip_x 0
+Assign n_periods ncols($1)/(2*$strip_width)
+repeat $n_periods
+  Set color 0
+  repeat 2
+    Subimage strip $1 $strip_width nrows($1) $strip_x 0
+    VSet strip $color
+    Delete_Image strip
+    Add_Var strip_x $strip_width
+    Increment color
+    end
+  end
+.
+
+Define Setup_Luts 0
+data
+  ascii
+    read use_lut -
+    	0 0 $red_level
+	0 $green_level 0
+    quit
+  quit
+.
+
+Define Map_Stripes 0
+Map key_frm key_strips stripe_lut
+
+VSet frm1{2} $red_level
+VSet frm2{1} $green_level
+.
+
+Set red_level 255
+Set green_level 255
+
+Define Cycle_It 2 count delay
+Cycle_2 $1 $2
+.
+
+
+Define SetGreen 0
+Set green_level $slider_val
+Update_Colors
+.
+
+Define SetRed 0
+Set red_level $slider_val
+Update_Colors
+.
+
+Define Update_Colors 0
+Setup_Luts
+Map_Stripes
+Show_Bytes key_frm key_v
+.
+
+Define Make_Adjustment 0
+If $left_button_up "exit_macro"	# no action on up-click
+Assign which_half floor($view_xpos/(ncols(adjuster_v)/2))
+If $which_half==$last_adjustment Increase_Increment
+If $which_half!=$last_adjustment&&$last_adjustment!=$no_adjustment
+  Decrease_Increment
+If $which_half
+  Then Increase_Green
+  Else Decrease_Green
+Set last_adjustment $which_half
+Update_Colors
+# Now should update the green slider!
+interface
+  decorate stim_panel
+    set_scale G $green_level
+    quit
+  quit
+.
+
+Define Increase_Green 0
+Assign green_level min(255,$green_level+$adjustment_increment)
+.
+
+Define Decrease_Green 0
+Assign green_level max(0,$green_level-$adjustment_increment)
+.
+
+
