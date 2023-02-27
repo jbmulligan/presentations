@@ -1,0 +1,92 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<title>Deeper recursion?</title>
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+<link href="../generic_slides/css/styles.css" rel="stylesheet" type="text/css">
+</head>
+
+<body>
+<table width="90%" border="0" align="center" cellpadding="0" cellspacing="0">
+  <tr> 
+    <td>
+      <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr> 
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+        <tr> 
+          <td width="20"><img src="../generic_slides/images/fl_white.gif" width="20" height="1"></td>
+          <td class="PageTitle">Deeper recursion</td>
+          <td align="right">
+	    <a href="recursion1.htm"><img src="../generic_slides/images/previous.gif" border="0"></a>
+	    <a href="first_pass2.htm"><img src="../generic_slides/images/next.gif" border="0"></a>
+	  </td>
+        </tr>
+        <tr> 
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+          <td>&nbsp;</td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+  <tr>
+    <td bgcolor="CC9900"><img src="../generic_slides/images/fl_gold.gif" width="1" height="3"></td>
+  </tr>
+  <tr>
+    <td>
+      <table width="100%" border="0">
+        <tr>
+	  <td>
+            <table width="100%" border="0" cellspacing="0" cellpadding="0">
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Multi-level recursion, number of levels = L</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Branching factor b = exp( log(N)/L ) (Lth root of N)</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">First pass cost:  O( T * b )</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Second pass cost per group:  O( T/b * b) = O( T )</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Total second pass cost:  O( b * T )</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Third pass cost per group:  O( T/(b*b) * b) = O( T/b )</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Total third pass cost:  O( b*b * T/b ) = O( b * T )</td>
+              </tr>
+              <tr> <td>&nbsp;</td> <td>&nbsp;</td> </tr>
+              <tr> 
+                <td width="50"><img src="../generic_slides/images/bullet1.gif" width="50" height="50"></td>
+                <td width="500" class="font1">Total cost reduction factor:  N/(bL) </td>
+              </tr>
+
+            </table>
+	  </td>
+	</tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>
