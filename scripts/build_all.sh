@@ -12,5 +12,6 @@ for d in ${dlist[@]}; do
 		./arrange_slides.csh
 		popd
 	fi
+	./scripts/deploy.sh $d
 done
 

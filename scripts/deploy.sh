@@ -18,7 +18,7 @@ if [[ ! -e $target_dir ]]; then
 	mkdir $target_dir
 fi
 
-cp $presentation_dir/*.htm $target_dir
+cp $presentation_dir/*.htm* $target_dir
 
 # We used to copy the images, but now they live there and we use a symlink
 
