@@ -1,0 +1,83 @@
+< $macro_dir/view/plotsupp.mac
+
+If $argc!=2 "error_exit 'usage:  $QUIP N string < show_new_results.scr'"
+
+Define Init_Map 0
+Vector map 256 3 u_byte
+VSet map[2]{2} 255
+VSet map[2]{1} 0
+VSet map[2]{0} 0
+
+VSet map[1]{2} 0
+VSet map[1]{1} 255
+VSet map[1]{0} 0
+
+VSet map[0]{2} 255
+VSet map[0]{1} 255
+VSet map[0]{0} 255
+
+VSet map[3]{2} 0
+VSet map[3]{1} 0
+VSet map[3]{0} 0
+.
+
+Define Load_Image 2 object_name n
+Assign n $2
+Set file image$n.tiff
+Hips_Read_Directory $HOME/working/public_html/home/presentations/emc_slides/images
+Filetype tiff
+Read_File_Header $file
+Dup_UByte b $file
+Image $1 nrows(b) ncols(b) 3 u_byte
+Get_Next b $file
+compute
+  misc
+    map $1 b map
+    quit
+  quit
+Delete_Image b
+# now erase the legend box
+Set dx 150
+Set dy 100
+Subimage box $1 $dx $dy ncols($1)-$dx 0
+VSet box 0
+Delete_Image box
+.
+
+#Viewer v 1024 768
+New_Plotter v 1024 768
+Posn_Window v 0 0
+Image z nrows(v) ncols(v) 1 u_byte
+VSet z 0
+
+Init_Map
+
+Define Doit 2 n legend
+Show_Bytes z v
+Load_Image i1 $1
+Load_Image i2 $1+1
+view
+  embed v i1 0 0
+  embed v i2 (ncols(v)-1)-ncols(i2) 0
+  quit
+Delete_Image i1
+Delete_Image i2
+# now add some legends
+Select_Pen $white
+S_At "attend inner" 0.1 0.3
+S_At "attend outer" 0.7 0.3
+S_At $2 0.3 0.1
+Wait_For_Up_Click
+.
+
+Set white 100
+Setcolor $white 255 255 255
+Select_Plotter v
+#Plot_Space 0 0 1 1
+Plot_Data_Range 0 0 1 1
+Init_Legend_Fonts v
+Legend_Font
+
+Doit $1 $2
+
+exit
