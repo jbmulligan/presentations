@@ -1,0 +1,147 @@
+#error_file /tmp/dfb_errors
+
+view xsync yes quit
+
+< black_bg.mac
+< $macro_dir/system/mark_time.mac
+
+Set wacky_val 2560
+#Set view_xpos $wacky_val
+#Set view_ypos $wacky_val
+
+Set desired_sample_rate 60
+Assign sample_ms 1000/$desired_sample_rate
+
+Black_BG
+
+Set view_w	512
+Set view_h	512
+Set panel_height 200
+
+Adj_Viewer v $view_w $view_h Movement
+
+Assign x0 floor((ncols(bg)-$view_w)/2)
+Assign y0 floor((nrows(bg)-($view_h+$panel_height))/2)
+Posn_Window v $x0 $y0
+
+Set bigw 2048
+Set bigh 2048
+
+advise 'Reading spiral image'
+Image bigim $bigh $bigw 1 u_byte
+Set f ../images/spiral.2048.jpg
+Read_File_Header $f
+Get_Next bigim $f
+
+Define Placeit 2 x y
+#advise "Placeit $1 $2"
+Subimage inset bigim 512 512 $bigw/2-$view_w/2-$1 $bigh/2-$view_h/2-$2
+Show_Bytes inset v
+Delete_Image inset
+.
+
+Define Movement 0
+nop
+.
+
+Set max_delay 64
+Vector delay_buf $max_delay 2 short
+Subvector sub1 delay_buf $max_delay-1 0
+Subvector sub2 delay_buf $max_delay-1 1
+VSet delay_buf 0
+
+Set h_delay 40
+Set v_delay 40
+Set max_saved_pts 8192
+Set n_saved 0
+Vector trace_buf $max_saved_pts 3 int
+
+Define SetVDelay 0
+Assign v_delay $slider_val
+Set n_saved 0
+.
+
+Define SetHDelay 0
+Assign h_delay $slider_val
+Set n_saved 0
+.
+
+
+interface
+  Set p delayed_feedback_panel
+  panel $p $view_w $panel_height
+  decorate $p
+    slider h_delay SetHDelay 0 $max_delay $h_delay
+    slider v_delay SetVDelay 0 $max_delay $v_delay
+    button QUIT Exit_DFB
+    button RESET Reset_DFB
+    quit
+  control
+    show $p
+    quit
+  decorate $p
+    set_position QUIT 400 50
+    set_position RESET 400 150
+    quit
+  quit
+Posn_Window $p $x0 $y0+$view_h+34
+
+# where do these come from???
+Assign min_to_save 32*12
+Assign max_to_save 128*12
+
+Define Exit_DFB 0
+# We 
+#Subvector trace trace_buf $n_saved 0
+If $n_saved<=0 "advise 'No samples saved' exit"
+Print n_saved
+Subvector unused trace_buf ncols(trace_buf)-$n_saved $n_saved
+VSet unused{0} value(trace_buf[$n_saved-1]{0})
+VSet unused{1} value(trace_buf[$n_saved-1]{1})
+Assign delta (value(trace_buf[$n_saved-1]{2})-value(trace_buf[0]{2}))/($n_saved-1)
+Ramp1D unused{2} value(trace_buf[$n_saved-1]{2})+$delta $delta
+Subvector trace trace_buf min(max($n_saved,$min_to_save),$max_to_save) 0
+Put_Ascii trace /tmp/dfb_trace.asc
+exit
+.
+
+Define Reset_DFB 0
+Set n_saved 0
+.
+
+Define Save_Sample 0
+Assign ex $view_xpos-$view_w/2
+Assign ey $view_ypos-$view_h/2
+VSet delay_buf[$h_delay]{0} $ex
+VSet delay_buf[$v_delay]{1} $ey
+Assign ox value(delay_buf[0]{0})
+Assign oy value(delay_buf[0]{1})
+Assign px $ex-$ox
+Assign py $ey-$oy
+Placeit $px $py
+VSet trace_buf[$n_saved]{0} $ex
+VSet trace_buf[$n_saved]{1} $ey
+VSet trace_buf[$n_saved]{2} $total_ms
+Increment n_saved
+.
+
+ReBlack
+Placeit 0 0
+ReBlack
+Zero_Time
+do
+  os events quit
+  VMov sub1 sub2
+  If $view_xpos!=$wacky_val&&$left_button_down "Save_Sample"
+  #Mark_Time
+
+  # make sure we're not running too fast
+  # nominal frame rate is 60 Hz
+  Check_Time
+  Assign need_delay (($n_saved+1)*$sample_ms)-$total_ms
+  If $need_delay>10 "usleep 1000*$need_delay"
+
+  while 1
+
+Pause
+
