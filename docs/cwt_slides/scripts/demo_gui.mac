@@ -1,0 +1,303 @@
+Set panel_width 400
+Set panel_gap 30
+Set v_gap 50
+
+Set gui_2_name	'Demo GUI 2'
+Set gui_2a_name	'Spatial and Temporal Params'
+Set gui_2b_name	'Motion Field Params'
+
+Set gui_1_name	'Demo GUI 1'
+Set gui_1a_name	'Spatial and Temporal Params'
+Set gui_1b_name	'Motion Field Params'
+
+Define SetLPSigma 0
+Set lp_sigma $slider_val
+Recompute_Texture
+.
+
+Define SetSPer 0
+Set s_period $slider_val
+Recompute_Modulator
+.
+
+Define SetTPer 0
+Set t_period $slider_val
+Update_T_Period
+.
+
+Define SetHShear 0
+Assign h_shear_amp $slider_val/100
+.
+
+Define SetVComp 0
+Assign v_comp_amp $slider_val/100
+.
+
+Define SetVShear 0
+Assign v_shear_amp $slider_val/100
+.
+
+Define SetHComp 0
+Assign h_comp_amp $slider_val/100
+.
+
+Define STParams 0
+Panel_Off $gui_1_name
+Panel_On $gui_1a_name
+.
+
+Define STDone 0
+Panel_Off $gui_1a_name
+Panel_On $gui_1_name
+.
+
+Define MFParams 0
+Panel_Off $gui_1_name
+Panel_On $gui_1b_name
+.
+
+Define MFDone 0
+Panel_Off $gui_1b_name
+Panel_On $gui_1_name
+.
+
+
+Define STParam2 0
+Panel_Off $gui_2_name
+Panel_On $gui_2a_name
+.
+
+Define STDone2 0
+Panel_Off $gui_2a_name
+Panel_On $gui_2_name
+.
+
+Set render_type sample
+
+Define SetRenderType 0
+Set render_type $choice
+.
+
+Define Set_Render_Type 1 type
+Set render_type $1
+interface
+  decorate $gui_1_name
+    set_choice "Render type" $render_type
+    quit
+  quit
+.
+
+Define Demo_GUI_1 0
+interface
+  panel $gui_1_name $panel_width 512
+  decorate $gui_1_name
+    button 'Next Demo' NextDemo
+    button 'Spatial and Temporal Params' STParams
+    button 'Motion Field Params' MFParams
+    chooser "Render type" SetRenderType 2 sample render
+    set_choice "Render type" $render_type
+    button QUIT exit
+    quit
+  panel $gui_1a_name $panel_width 512
+  decorate $gui_1a_name
+    button 'Next Demo' NextDemo
+    slider 'LP Filter constant' SetLPSigma 1 100 $lp_sigma
+    slider 'Spatial Modulation (pixels)' SetSPer 16 320 $s_period
+    slider 'temporal period (frames)' SetTPer 4 128 $t_period
+    button DONE STDone
+    quit
+  panel $gui_1b_name $panel_width 512
+  decorate $gui_1b_name
+    button 'Next Demo' NextDemo
+    slider 'H shear amp x100' SetHShear -100 100 $h_shear_amp*100
+    slider 'V comp amp x100' SetVComp -100 100 $v_comp_amp*100
+    slider 'V shear amp x100' SetVShear -100 100 $v_shear_amp*100
+    slider 'H comp amp x100' SetHComp -100 100 $h_comp_amp*100
+    button DONE MFDone
+    quit
+  control
+    show $gui_1_name
+    quit
+  quit
+Posn_Window $gui_1_name $panel_gap $v_gap
+Posn_Window $gui_1a_name $panel_gap $v_gap
+Posn_Window $gui_1b_name $panel_gap $v_gap
+.
+
+Define SetNSpokes 0
+Set freqN $slider_val
+Recompute_Def_Modulator
+.
+
+Define Demo_GUI_2 0
+interface
+  panel $gui_2_name $panel_width 512
+  decorate $gui_2_name
+    button 'Next Demo' NextDemo
+    button 'Spatial and Temporal Params' STParam2
+    button QUIT exit
+    quit
+  panel $gui_2a_name $panel_width 512
+  decorate $gui_2a_name
+    button 'Next Demo' NextDemo
+    slider 'LP Filter constant' SetLPSigma 1 100 $lp_sigma
+    slider 'Number of "spokes"' SetNSpokes 1 15 $freqN
+    slider 'temporal period (frames)' SetTPer 4 128 $t_period
+    button DONE STDone2
+    quit
+  control
+    show $gui_2_name
+    quit
+  quit
+Posn_Window $gui_2_name $panel_gap $v_gap
+Posn_Window $gui_2a_name $panel_gap $v_gap
+.
+
+Define Declare_Demo_Objs 0
+Image texture $h $w 1 float
+Image mtex $h $w 1 float
+Image btex $h $w 1 u_byte
+Image base_coords $h $w 2 float
+Image polar_coords $h $w 2 float
+Image tmp_coords $h $w 2 float
+Image cos_theta $h $w 1 float
+Image sin_theta $h $w 1 float
+Image cos_Ntheta $h $w 1 float
+Image sin_Ntheta $h $w 1 float
+Image tmp_arg $h $w 1 float
+Image tmp1 $h $w 1 float
+Image tmp2 $h $w 1 float
+Image tmp3 $h $w 1 float
+Image v_x $h $w 1 float
+Image v_y $h $w 1 float
+Image v_a $h $w 1 float
+Image v_t $h $w 1 float
+Image mod $h $w 2 float
+Image tmpmod $h $w 1 float
+Image coords $h $w 2 float
+.
+
+Define Recompute_Texture 0
+VUni texture
+Low_Pass texture $lp_sigma	# sigma in pixels?  bigger value is more blur...
+Scale texture 0 1
+.
+
+Define Init_Base_Coords 0
+Ramp2D base_coords{0} 0 1 0
+Ramp2D base_coords{1} 0 0 1
+VMov coords{1} base_coords{1}
+VMov coords{0} base_coords{0}
+.
+
+Define Init_Def_Coords 0
+Make_Radius_At polar_coords{0} 0 0
+Make_Angle_At polar_coords{1} 0 0
+.
+
+Define Recompute_Modulator 0
+Ramp2D mod{0} 0 atan(1)*8/$s_period 0
+VSin mod{0} mod{0}
+Ramp2D mod{1} 0 0 atan(1)*8/$s_period
+VSin mod{1} mod{1}
+.
+
+Set freqN 5
+
+Define Recompute_Def_Modulator 0
+VSMul tmp_arg polar_coords{1} $freqN
+VSin sin_Ntheta tmp_arg
+VCos cos_Ntheta tmp_arg
+
+VSin sin_theta polar_coords{1}
+VCos cos_theta polar_coords{1}
+
+VVMul v_a cos_Ntheta polar_coords{0}
+VVMul v_t sin_Ntheta polar_coords{0}
+VSMul v_a v_a 1/$w
+VSMul v_t v_t 1/$w
+
+
+VVMul tmp1 v_a cos_theta
+VVMul tmp2 v_t sin_theta
+VSMul tmp2 tmp2 -1
+VVAdd v_x tmp1 tmp2
+
+VVMul tmp1 v_a sin_theta
+VVMul tmp2 v_t cos_theta
+VVAdd v_y tmp1 tmp2
+.
+
+
+Define Render_Shear_Frame 1 tamp
+VSMul tmpmod mod{1} $1*$h_shear_amp
+VVAdd coords{0} base_coords{0} tmpmod	# horizontal shear
+VSMul tmpmod mod{1} $1*$v_comp_amp
+VVAdd coords{1} base_coords{1} tmpmod	# vertical compression
+
+VSMul tmpmod mod{0} $1*$h_comp_amp
+VVAdd coords{0} coords{0} tmpmod	# horizontal compression
+VSMul tmpmod mod{0} $1*$v_shear_amp
+VVAdd coords{1} coords{1} tmpmod	# vertical shear
+
+If !strcmp('$render_type','sample')
+  Then Compute_Sampled_Texture
+  Else Compute_Rendered_Texture
+.
+
+Define Compute_Sampled_Texture 0
+compute sample sample mtex texture coords quit quit
+Show_Image mtex stim_v
+.
+
+Define Compute_Rendered_Texture 0
+VSet mtex 0
+compute sample render2 mtex texture coords quit quit
+VSMul mtex mtex 128
+Convert btex mtex
+Show_Bytes btex stim_v
+.
+
+Define Render_Def_Frame 1 tamp
+VSMul tmpmod v_x $1
+VVAdd coords{0} base_coords{0} tmpmod
+VSMul tmpmod v_y $1
+VVAdd coords{1} base_coords{1} tmpmod
+
+compute sample sample mtex texture coords quit quit
+Show_Image mtex stim_v
+.
+
+Define Update_T_Period 0
+Assign t_arg_inc 8*atan(1)/$t_period
+.
+
+Define Update_Shear_Stim 0
+Assign t_amp $amp*sin($t_arg)
+Render_Shear_Frame $t_amp
+Add_Var t_arg $t_arg_inc
+.
+
+Define Update_Def_Stim 0
+Assign t_amp $amp*sin($t_arg)
+Render_Def_Frame $t_amp
+Add_Var t_arg $t_arg_inc
+.
+
+Define Declare_Stim_Viewer 0
+Viewer stim_v $w $h
+Posn_Window stim_v 2*$panel_gap+$panel_width $v_gap
+.
+
+Set demo_index 0
+Set demo_dir /Users/jmulliga/working/public_html/home/presentations/cwt_slides/scripts
+
+Define NextDemo 0
+Increment demo_index
+Set filename ${demo_stem}_demo_$demo_index.scr
+Set pathname $demo_dir/$filename
+If !file_exists('$pathname')
+  "warn 'File $filename not found!?' exit_macro"
+< $pathname
+.
+

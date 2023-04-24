@@ -1,0 +1,15 @@
+
+Notes on launching scripts from the browser.
+
+On linux, firefox can specify /bin/csh to interpret script files,
+but on the mac, the helper applications has to be a .app bundle!?
+
+This is solved using a system tool called the Automator, an app
+called run_csh is created that runs the following commands using /bin/bash:
+
+echo $1 > /tmp/run_csh_file
+/bin/csh -c $1
+
+
+The .app bundle is placed in $HOME/scripts (which must be in the $PATH).
+

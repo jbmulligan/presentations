@@ -1,0 +1,34 @@
+#!/bin/csh
+
+# Write in 'csh_list' the list of movie roots to create the correponding csh file
+# Put the movies of feature estimation last (so that this script generates the right reading speed)
+# Set the number of feature estimation files:
+@ n_featEst_files=10
+
+set n=`cat csh_list | wc -l`
+echo n = $n
+
+set i=1
+while( $i <= $n )
+
+  set MOVIE_ROOT=`head -$i csh_list | tail -1`
+  set this_csh=$MOVIE_ROOT.csh 
+  if( $i < $n - $n_featEst_files ) then
+    @ READ_SPEED = 4
+  else
+    @ READ_SPEED = 1
+  endif
+
+  echo s/ROOT/$MOVIE_ROOT/ > sub.sed
+  echo s/SPEED/$READ_SPEED/ >> sub.sed
+
+  sed -f sub.sed < csh_template > $this_csh
+
+  echo "Created CSH file $this_csh"
+
+  @ i ++
+end
+
+/bin/rm sub.sed
+
+

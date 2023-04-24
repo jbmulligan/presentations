@@ -1,0 +1,58 @@
+# vt script to show the images
+
+Set x1 50
+Set y1 100
+
+Set x2 562
+Set y2 400
+
+Image frame 480 640 1 u_byte
+Image field 240 640 1 u_byte
+Image b 240 320 1 u_byte
+Viewer_For v4 b
+Posn_Viewer v4 $x2 $y2
+Viewer_For v3 b
+Posn_Viewer v3 $x1 $y2
+Viewer_For v2 b
+Posn_Viewer v2 $x2 $y1
+Viewer_For v1 b
+Posn_Viewer v1 $x1 $y1
+view wait v1 quit
+
+Set gx 19200
+Set gy 5500
+
+Set infile1 lamps.Mrep1.$gx.$gy.cam1.jpeg
+Set infile2 lamps.Mrep4.$gx.$gy.cam1.jpeg
+Set infile3 lamps.Srep1.$gx.$gy.cam1.jpeg
+Set infile4 lamps.Srep4.$gx.$gy.cam1.jpeg
+
+Hips_Read_Directory $HOME/broca2/data/led/jpegs
+
+Define Playit 0
+Read_File_Header $infile1
+Read_File_Header $infile2
+Read_File_Header $infile3
+Read_File_Header $infile4
+
+repeat 31
+  Get_Next frame $infile1
+  Reduce b frame
+  Show_Bytes b v1
+  Get_Next frame $infile2
+  Reduce b frame
+  Show_Bytes b v2
+  Get_Next field $infile3
+  Reduce b field
+  Show_Bytes b v3
+  Get_Next field $infile4
+  Reduce b field
+  Show_Bytes b v4
+  #Wait_For_Up_Click
+  end
+.
+
+do
+  Playit
+  while 1
+

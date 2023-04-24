@@ -1,0 +1,76 @@
+# This file doesn't compate H and V, it compares black-white halftones
+# with out-of-phase primary patterns...
+
+< $macro_dir/view/plotsupp.mac
+< adjuster.mac
+< gamma_demo.mac
+#Background_Viewer
+
+Image rgb 512 512 3 u_byte
+Viewer_For g_v rgb
+Posn_Window g_v 450 100
+
+interface
+  panel grating_panel 360 300
+  decorate grating_panel
+    adjuster H_level SetHLevel 0 255 255
+    adjuster V_level SetVLevel 0 255 255
+    button QUIT exit
+    quit
+  control
+    show grating_panel
+    quit
+  quit
+Posn_Window grating_panel 30 100
+
+Set patch_h 200
+Set patch_w 200
+
+VSet rgb 0
+Image patch $patch_h $patch_w 1 u_byte
+Image rgb_patch $patch_h $patch_w 3 u_byte
+Vector lut 256 3 u_byte
+VSet lut 0
+Subvector use_lut lut 2 0
+
+Stipple patch 0			# 0's and 1's
+
+Set x1 56
+Set x2 256
+
+Subimage p1 rgb $patch_w $patch_h $x1 156
+Subimage p2 rgb $patch_w $patch_h $x2 156
+
+data ascii read use_lut -
+	255 255 255
+	0 0 0
+	quit quit
+Map rgb_patch patch lut
+VMov p1 rgb_patch
+
+data ascii read use_lut -
+	255 0 255
+	0 255 0
+	quit quit
+Map rgb_patch patch lut
+VMov p2 rgb_patch
+
+Define SetHLevel 0
+Assign h_level $slider_val
+Set_Levels $h_level $v_level
+.
+
+Define SetVLevel 0
+Assign v_level $slider_val
+Set_Levels $h_level $v_level
+.
+
+
+do
+  Show_Bytes rgb g_v
+  os events quit
+  while 1
+
+Pause
+
+

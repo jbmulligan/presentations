@@ -1,0 +1,157 @@
+max_warnings 3
+
+Set bill_file ../images/bill1_small.jpg
+Read_File_Header $bill_file
+Image rgb_bill nrows('$bill_file') ncols('$bill_file') 3 u_byte
+Image f_bill nrows('$bill_file') ncols('$bill_file') 3 float
+Get_Next rgb_bill $bill_file
+Rotate_Colors rgb_bill
+Convert f_bill rgb_bill
+
+Viewer bg_v ncols('$DISPLAY') nrows('$DISPLAY')
+Image bg nrows(bg_v) ncols(bg_v) 3 u_byte
+VSet bg 0
+Show_Bytes bg bg_v
+
+Viewer dollar_v 600 600
+Set y0 10
+Posn_Window dollar_v 0 $y0
+
+Image rgb nrows(dollar_v) ncols(dollar_v) 3 u_byte
+
+Set dollar_w 485
+Set dollar_h 247
+
+Set dollar_r 129
+Set dollar_g 79
+Set dollar_b 0
+
+Define SetWidth 0
+Set dollar_w $slider_val
+Update_Size
+.
+
+Define SetHeight 0
+Set dollar_h $slider_val
+Update_Size
+.
+
+Define Update_Size 0
+Assign x0 floor((ncols(dollar_v)-$dollar_w)/2)
+Assign y0 floor((nrows(dollar_v)-$dollar_h)/2)
+Set y0 50
+Subimage inset rgb $dollar_w $dollar_h $x0 $y0
+VSet rgb{0} $dollar_b
+VSet rgb{1} $dollar_g
+VSet rgb{2} $dollar_r
+VSet inset 0
+Delete_Image inset
+
+Subimage inset rgb $dollar_w $dollar_h $x0 nrows(rgb)-$dollar_h-$y0
+Dup_Float finset inset
+Warp_Bill finset f_bill
+Convert inset finset
+Delete_Image finset
+Delete_Image inset
+
+Show_Bytes rgb dollar_v
+.
+
+Define Warp_Bill 2 dst src
+# assume dst is smaller than src
+# Push samples w/ render function
+Image coords nrows($2) ncols($2) 2 float
+Ramp2D coords{0} 0 ncols($1)/ncols($2) 0
+Ramp2D coords{1} 0 0 nrows($1)/nrows($2)
+Render $1 $2 coords
+Dup_Float norm_img $1
+Dup_Float ones $2
+VSet ones 1
+Render norm_img ones coords
+VVDiv $1 $1 norm_img
+Delete_Image norm_img
+Delete_Image ones
+Delete_Image coords
+.
+
+Define SetRed 0
+Set dollar_r $slider_val
+Update_Size
+.
+
+Define SetGreen 0
+Set dollar_g $slider_val
+Update_Size
+.
+
+Define SetBlue 0
+Set dollar_b $slider_val
+Update_Size
+.
+
+Assign attenuation_factor 154/1000
+Set rg_atten -19
+Set by_atten -100
+
+Assign r_factor (100-$rg_atten)/100
+Assign g_factor ($rg_atten+100)/100
+Assign y_factor (100-$by_atten)/100
+Assign b_factor ($by_atten+100)/100
+
+Define SetAtten 0
+Assign attenuation_factor $slider_val/1000
+Update_Atten
+.
+
+Define Update_Atten 0
+Assign r_attenuation_factor $attenuation_factor*$r_factor*$y_factor
+Assign g_attenuation_factor $attenuation_factor*$g_factor*$y_factor
+Assign b_attenuation_factor $attenuation_factor*$b_factor
+
+Convert f_bill rgb_bill
+advise "Attenuation factors:  r $r_attenuation_factor   g $g_attenuation_factor     b $b_attenuation_factor"
+VSMul f_bill{0} f_bill{0} $b_attenuation_factor
+VSMul f_bill{1} f_bill{1} $g_attenuation_factor
+VSMul f_bill{2} f_bill{2} $r_attenuation_factor
+Update_Size
+.
+
+Define SetRG 0
+Assign r_factor (100-$slider_val)/100
+Assign g_factor ($slider_val+100)/100
+Update_Atten
+.
+
+Define SetBY 0
+Assign y_factor (100-$slider_val)/100
+Assign b_factor ($slider_val+100)/100
+Update_Atten
+.
+
+interface
+  panel dollar_panel 350 560
+  decorate dollar_panel
+    position 0 0
+    adjuster width SetWidth 100 ncols(dollar_v) $dollar_w
+    adjuster height SetHeight 100 nrows(dollar_v) $dollar_h
+    #position 350 0
+    adjuster Attenuation_x_1000 SetAtten 1 1000 1000*$attenuation_factor
+    adjuster RG_Balance SetRG -100 100 $rg_atten
+    adjuster BY_Balance SetBY -100 100 $by_atten
+    button QUIT exit
+    #Pause
+    quit
+  control
+    show dollar_panel
+    quit
+  quit
+Posn_Window dollar_panel ncols(dollar_v)+20 $y0
+
+Update_Size
+Update_Atten
+Show_Bytes bg bg_v
+do
+  os events quit
+  while 1
+
+

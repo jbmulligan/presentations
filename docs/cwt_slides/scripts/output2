@@ -1,0 +1,4 @@
+ram:mra_coords[0][0]                    scalar                                float, complex
+     -255.5      255.5
+ram:mra_coords[100][100]                scalar                                float, complex
+     -155.5      155.5

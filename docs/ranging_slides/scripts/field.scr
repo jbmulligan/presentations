@@ -1,0 +1,195 @@
+#
+# vt script to illustrate light fields...
+
+Define Set_Colors 0
+Set black 22
+Setcolor $black 0 0 0
+Set green 23
+Set white 24
+Set red 25
+Setcolor $green 0 255 0
+Setcolor $red 255 0 0
+Setcolor $white 255 255 255
+.
+
+#Viewer top_view 400 400
+view
+  viewers
+    dragscape top_view 400 400
+    quit
+  quit
+Posn_Viewer top_view 500 40
+Set_Colors
+
+Image ball_bm 16 16 1 bit
+Image ball_img 16 16 1 u_byte
+
+Image f 200 200 3 float
+Image g 200 200 1 float
+Image b 200 200 1 u_byte
+Image h 200 200 1 float
+
+Define Make_Ball 3 angle attenuation window
+Assign mbtheta $1*atan(1)/45
+Ramp2D f{0} -100 1 0
+Ramp2D f{1} -100 0 1
+VSMul f f 1.2/100
+VVMul g f{1} f{1}
+VVMul h f{0} f{0}
+VVAdd g g h
+VSAdd g g -1
+# if it's negative then we're on the sphere
+VSMin g g 0
+VSMul g g -1
+VSqrt f{2} g
+#Disp_Gray g probe_v1
+#Pause
+
+VSMul g g 10000
+VSMin g g 1
+#Disp_Gray g probe_v1
+#Pause
+VVMul f{0} f{0} g
+VVMul f{1} f{1} g
+
+#Disp_Gray f{0} probe_v1
+#Pause
+#Disp_Gray f{1} probe_v1
+#Pause
+
+# now light the ball
+Assign a sin($mbtheta)
+Assign b 0
+Assign c cos($mbtheta)
+
+# take the dot product of (a,b,c) with the normal vector
+VSMul g f{0} $a
+#Disp_Gray g probe_v1
+#Pause
+VSMul h f{2} $c
+#Disp_Gray h probe_v1
+#Pause
+VVAdd g g h
+VSMax g g 0
+# g goes from 0 to 1
+VSMul g g 255*$2
+Convert b g
+Show_Bytes b $3
+#Disp_Gray g probe_v1
+
+.
+
+
+Viewer probe_v1 200 200
+Viewer probe_v2 200 200
+Posn_Viewer probe_v1 500 480
+Posn_Viewer probe_v2 720 480
+Set_Colors
+
+Set xc 200
+Set yc 50
+
+verbose yes
+Set ang -40
+Set atten 1
+repeat 21
+  #Make_Ball $ang $atten probe_v1
+  Add_Var ang 4
+  Mul_Var atten 0.95
+  end
+
+
+Set rad 10
+
+Define Ball_At 2 r theta
+advise "Ball_At $1 $2"
+Assign ang $2
+Assign range $1
+Assign bx $xc+$range*sin($ang)
+Assign by $yc+$range*cos($ang)
+
+view
+  draw top_view
+    clear
+    quit
+  quit
+
+Draw_Near_Field $xc $yc $green
+Draw_Near_Field $xc+50 $yc $red
+
+view
+  draw top_view
+    advise 'draw a disk'
+    foreground $white
+    # 
+    fill_arc $bx-$rad $by-$rad 2*$rad 2*$rad 0 64*360
+    #Pause
+    quit
+  quit
+Assign atten ($d0*$d0)/($range*$range)
+Print atten
+Mul_Var ang 45/atan(1)		# convert to degrees
+Make_Ball $ang $atten probe_v1
+# now get the coords relative to the second lamp
+Mul_Var ang atan(1)/45
+Assign bx $range*sin($ang)
+Assign by $range*cos($ang)
+Add_Var bx -50			# x coord of second lamp
+Assign ang 45*atan2($bx,$by)/atan(1)
+advise "ang relative to second illum is $ang"
+Assign range sqrt($bx*$bx+$by*$by)
+Print range
+Assign atten ($d0*$d0)/($range*$range)
+Make_Ball $ang $atten probe_v2
+.
+
+Define Draw_Near_Field 3 fx fy color
+view
+  draw top_view
+    background $black
+    foreground $3
+    Set diam 0
+    repeat 11
+      Assign xl $1-$diam/2
+      Assign yu $2-$diam/2
+      arc $xl $yu $diam $diam (180+45)*64 (90)*64
+      Add_Var diam 50
+      end
+    # now put a disk at a position...
+    quit
+  quit
+.
+
+#Vector xy 40 2 float
+
+Set d0 120
+Set n_deg 3
+
+Set r 150
+Set theta 0
+repeat 10
+  Ball_At $r $theta
+  Mul_Var r 1.02
+  end
+repeat 10
+Print theta
+  Ball_At $r $theta
+  Add_Var theta $n_deg*atan(1)/45	# 1 deg
+  end
+repeat 10
+  Ball_At $r $theta
+  Mul_Var r 1/1.02
+  end
+repeat 20
+  Ball_At $r $theta
+  Add_Var theta -$n_deg*atan(1)/45
+  end
+repeat 10
+  Ball_At $r $theta
+  Mul_Var r 1.02
+  end
+repeat 10
+Print theta
+  Ball_At $r $theta
+  Add_Var theta $n_deg*atan(1)/45	# 1 deg
+  end

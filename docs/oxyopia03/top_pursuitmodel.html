@@ -1,0 +1,145 @@
+<!doctype html public "-//w3c//dtd html 4.0 transitional//en">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+   <meta name="GENERATOR" content="Mozilla/4.73 [en] (X11; I; Linux 2.2.15-4mdksmp i686) [Netscape]">
+   <title>top_pursuitmodel</title>
+</head>
+<body bgcolor="#FFFFFF" vlink="#580C88">
+
+<div align=right>
+<a href="oxyopia_contents.html"><img SRC="../gifs/top.gif" ALT="contents" ></a>
+<a href="theirmodel.html"><img SRC="../gifs/prev.gif" ALT="previous" ></a>
+<a href="krauzlis.html"><img SRC="../gifs/next.gif" ALT="next" ></a>
+</div>
+
+<BODY BACKGROUND="sglhome.gif">
+
+<H2><FONT COLOR="#9696ff">An applet that will run Mark Churchland's improved
+version of our "image motion" model of pursuit eye movements</FONT></H2>
+
+Please wait while the applet loads.  
+<p>
+If the applet fails to load, performs slowly, or stops suddenly, check to see that Java is enabled in the 
+preferences for your browser.  If Java is enabled, you may have an older browser that does not deal well with
+Java applets.  Visit these sites for free downloads to update your browser:  
+<p>
+<a href="http://www.microsoft.com/windows/ie/default.htm">Microsoft Internet Explorer update</a> 
+<p>
+<a href="http://home.netscape.com/download/">Netscape update</a>
+<p>
+
+
+
+<BR>
+<APPLET
+  CODEBASE = "."
+  CODE     = "pursuitappawt/Applet1.class"
+  NAME     = "TestApplet"
+  WIDTH    = 1050
+  HEIGHT   = 580
+  HSPACE   = 0
+  VSPACE   = 0
+  ALIGN    = middle
+>
+</APPLET>
+
+
+
+<form method="POST">
+ <textarea name="S1" rows="10" cols="100" wrap="virtual">
+
+	The following primer is still somewhat rough. It has been adapted from the primer that accompanied a matlab version of the models. Some details still need to be updated. 
+Nonetheless, it should provide a reasonable introduction to pursuit modelling in general, and to two specific models in particular. 
+
+GOAL OF PURSUIT 
+
+	The purpose of the pursuit system is to track moving targets by matching eye velocity to the velocity of the target. When this is achieved, the target image is rendered motionless on the retina. The pursuit system operates under the control of visual feedback. The movement of the target image on the retina ('image velocity') is continually monitered and the eye is accelerated so as to reduce any such movement. 
+
+SIMPLE PURSUIT MODEL 
+
+	A simple way to create eye accelerations that reduce image velocity is to make eye acceleration proportional to image velocity. Then, if the target is moving faster than the eye, the eye will accelerate, and if the target is moving more slowly than the eye, the eye will decelerate. Of course, the nervous system cannot measure image velocity instantaneously. There must be a delay between image motion and the eye acceleration response. We will include this feature in our model. 
+
+	We can examine the properties of such a 'velocity-servo' model by setting the models' parameters as follows: Velocity Delay: around 80 Velocity Gain: around 3 Acceleration Gain: 0 use the step target Target velocity is shown in red. The target is stationary for the first 100ms and then begins to move at 15 deg/s. The eye velocity produced by the model is shown in blue. The eye is stationary until 80 ms after the target begins to move. At this point, the eye accelerates in response to the motion of the target on the retina. As eye velocity increases, image velocity decreases, and thus does eye acceleration also. Eye velocity approaches target velocity with an exponential relaxation. The behavior of both models is the same under these conditions. As discussed later, each uses the same image velocity pathway. A drawback of this model is that it is slow to reach target velocity. The 80ms response delay is an inevitable consequence of the visual delays in the nervous system, but even after this, the eye velocity produced by this model takes another 600ms to reach target velocity. Monkeys and humans are much faster than this. Click on Examples/Steps to see the responses of two monkeys to the same target. Each monkey exhibits a delay before the eye begins to accelerate, but both reach target velocity within the next 200ms. 
+	An obvious way to speed the performance of the model is to increase its gain. Do this by altering the gain of the velocity pathway. Velocity Gain: around 8 As desired, the model now reaches target velocity within 200ms after initiating pursuit. However, it does not stop there, but shoots past, and then oscillates around target velocity (with a period of about 500ms) before finally settling down. Both monkeys do exhibit an overshoot of target velocity, but it is small. And while both also show spontaneous oscillations about target velocity, these are of a period nearer 200ms than 500. 
+	Turn on the 'image velocity' trace. Note that it is initially equal to target velocity, and is eventually reduced to near zero. In the simple model, eye acceleration is proportional to image velocity, with a delay. 
+	Turn on the 'velocity pathway' trace. This shows the eye acceleration command produced by image velocity. (this command is scaled by 1/10, such that an acceleration of 100 deg/s/s is represented by 10 on the vertical scale). Note that the acceleration command is just a filtered, delayed and scaled version of image velocity.(The filter is also a parameter of the model, but is not alterable using the GUI. It is set at 30ms, a value consistent with both behavioral and neural measurements. A 20 ms 'plant' filter also adds a small amount to the effective delay) The source of the overshoot is now obvious. Due to the 80ms delay (and to a lesser degree the filters), the eye acceleration command does not reach zero until more than 100ms after image velocity reaches the desired value of zero. Thus, eye acceleration ends and eye velocity peaks about 100ms after target velocity is reached. As one quarter cycle of the oscillation is thus more than 100ms, a full cycle must take at least 400ms. 
+
+
+THE IMAGE MOTION MODEL (developed by Krauzlis and Lisberger) 
+
+The simple model described above fails because of the delay between the input to the pursuit system (image velocity) and the output (eye acceleration). let iv(t) be the image velocity at time t. let ea(t) be the eye acceleration. let d be the delay. The system would work fine if ea(t) = const * iv(t) but unfortunately ea(t) = const * iv(t-d) One way to improve performance is to make an estimate of iv(t) using iv(t-d) and its derivative. let ia(t) be the acceleration of the retinal image at time t. One might use the following strategy: ea(t) = const1 * iv(t-d) + const2 * ia(t-d) 'const2' should be approximately the delay times 'const1' to yeild a good estimate of iv(t). 
+Try this strategy by setting: 
+
+Acceleration Gain: equal to 8 * 0.08 = 0.64. 
+Saturation: 0 
+
+Performance is much improved. An acceleration gain of a little less, about 0.55, appears to be ideal. More importantly, the model's parameters can be set to produce pursuit profiles that resemble those of the two monkeys. Fits can be obtained by clicking the 'fit without saturation' buttons on the examples. It is possible but unlikely that different implementations of functions (such as the exponent) on different platforms may result in differences in the fits (even small errors propegate themselves into large ones, due to the feedback nature of pursuit). If fits look imperfect using your machine, alter the gains of the two pathways in small increments until the fits look good. Hopefully this will not be a problem, but I wish to call attention to it, lest someone be left with poor fits. You may observe the output of the image acceleration pathway by clicking on its box. You will also note that the oscillations produced by this model are in the correct range of roughly 5 Hz. You may wish to play further with the parameters to get a feel of their effect on the models performance. 
+Note that 
+1) Shorter delays (when identical for both pathways) produce less overshoot and better damped ringing. 
+2) Longer delays produce larger overshoots and more ringing 
+3) Increasing the velocity delay alone produce more overshoot and better damping. 
+4) Decreasing the velocity delay alone produce less overshoot and worse damping 5) Increasing the velcity gain produces larger overshoots 
+6) Increasing the acceleration gain produces smaller overshoots and more ringing. 
+
+
+THE TACHOMETER FEEDBACK MODEL (developed by Ringach) 
+
+	The image motion model uses the derivative of its input, image velocity: ea(t) = const1 * iv(t-d) + const2 * ia(t-d) Given that the neural signal coding iv might be somewhat noisy and unreliable to begin with, extracting ia might be difficult or impossible. An alternative is to use eye acceleration to estimate image acceleration. ia(t) = ta(t) - ea(t) where ta is target acceleration. 
+	Thus, ea(t) = ta(t) - ia(t) If target accelerations are small, eye acceleration is a good estimate of target image deceleration. In the case of the constant velocity targets, ea(t) = -ia(t) for all t excepting that when the target first begins to move. The tachometer feedback model takes advantage of this fact and replaces the image acceleration signal with an eye acceleration signal. 
+
+ea(t) = const1 * iv(t-d) - const2 * ea(t-d) 
+
+To facilitate comparison, we have made the image motion model immune to the large but brief image acceleration present when the target first begins to move. For velocity steps, the two models are then formally identical. Thus, the success of the image motion model in fitting step responses is shared by the tachometer feedback model. The behavior of the two models is expected to diverge when: 
+1) the target accelerates 
+2) the visual feedback delay is altered This second condition affects the delay of both inputs to the image motion model (iv and ia) but only one input to the tachometer feedback model (iv). 
+Eye acceleration is a motor signal unaffected by visual delay. 
+
+
+PERFORMANCE WHEN THE VISUAL DELAY IS ALTERED
+
+ 	The visual delay can be altered by changing the luminance of the target, or by using image stabalization techniques to create an 'artificial delay.' Data collected under the latter condition can be examined by clicking on Examples/Added Delay. The top trace shows the response of monkey Jo to a 15 deg/s step of target velocity. He shows pronounced, nearly undamped spontaneous oscillations. The next two traces show his response when the feedback delay was artificially lenthened to 60 and 80 ms. 
+	To examine the responses of each model, open the added delay example and click on the 'fit without saturation' button. Like monkey Mo in the example, both models exhibit nearly undamped oscillations when there is no added delay. A notable failure of the models is the lack of an overshoot on the first cycle. Let us ignore this for now. 
+
+	Set Artificial Delay: 60-80 ms.  When the visual delay is artificially lengthened, the image motion model begins to oscillate out of control. Remarkably, the tachometer feedback model is actually better damped as a result of the added delay (the effect is the same as lengthening the velocity delay alone). Note that the pursuit of Monkey Mo does not become unstable at long delays. If anything, the spontaneous oscillations are then actually better damped. For these reasons, Ringach argued that the image motion model was inadequate, and proposed the tachometer feedback model as a replacement. 
+
+
+AN IMPORTANT NONLINEARITY
+
+ 	We have thusfar dealt with linear versions of the two models. Real pursuit does, however exhibit some relevant non-linearities. Eye acceleration is not quite a linear function of image velocity, but saturates slighty. If image acceleraton drives eye acceleration, as proposed by the image motion model, this relationship is likely not entirely linear either. Both these nonlinearities are include in the full versions of the two models, but are not included here as their effects on the qualitative behavior of the models is minimal. A more important nonlinearity is the potential dependence of the image acceleration signal upon image velocity. If the pursuit system is indeed sensitive to image acceleration, it may be most sensitive when image velocity is near zero. i.e. an acceleration from 0 to 5 deg/s may be more salient than an acceleration from 20 to 25 deg/s. A number of neurally plausible methods for calculating derivatives produce such behavior. 
+	Behavioral results also support the conclusion that the image acceleration signal becomes weak when image velocity is large. Let us include such a nonlinearity in the image motion model by putting: ia = d(f(iv))/dt where 'f' is a saturation function set: artificial delay back to '0' You may alter the linearity of 'f' by changing the 'Saturation' slider. Shown to the right is f(v) in green and df(v)/dv in red. The saturation has been normalized so that df(v)/dv is 1 when v = 1. Turn on the image velocity and acceleration pathway traces. Note that increasing the saturation decreases the initial acceleration signal (which serves to brake eye acceleration). This is because image velocity is high at this time. click on the 'fit with saturation' button The image motion model now exhibits an overshoot and oscillation damping similar to monkey Mo. 
+	The tachometer feedback model does not include such a saturation. If one did saturate the eye velcity signal prior to extraction of eye acceleration, it would only serve to decrease the overshoot. Additionally, the behavioral evidence supports such a saturation only in the case of the image motion model. Now increase the artificial delay to 60-80 ms. The image motion model now behaves much like the monkey. It exhibits large, long, but controlled oscillations. Damping is actually slightly improved. The second cycle is slightly smaller in amplitude than the first. While the tachometer feedback model does not ring out of control when delay is artificially added, nor does its behavior resemble that of the monkey. The original period of oscillations (produced by the internal eye acceleration feedback) never changes. Rather, these become superimposed upon other slower oscillations. Only if the acceleration gain is set very low does the tachometer feedback model exhibit any large, slow oscillations. The tachometer feedback model also fails to capture the initial overshoot. When the acceleration gain is high enough to produce undamped oscillations, there is no such overshoot unless the velocity gain is high, and the initial eye acceleration therefore also quite high. Monkey Mo exhibits an overshoot despite the fact that initial eye acceleration is fairly slow. 
+
+
+RESPONSES TO SINUSOIDAL TARGET PERTURBATIONS
+
+ 	The responses of monkey Na to sinusoidal target perturbations at three different frequencies can be seen by clicking on Examples/Sines. These were recorded during ongoing pursuit of a step of target velocity, and isolated by subtracting the average response to the step alone. To examine the responses of the models, set the model parameters back to the values that provided good fits to the step response: (open the first step example and clit 'fit without saturation') Keep Saturation at 0 for now to facilitate comparison. Click on Target/Sine100, and turn all extraneous traces off. The image motion model produces a response much like that of the monkey: about 1/4 the size of the stimulus, and 360 phase lagged. The tachometer feedback model produces a response that is too small and too late in phase by almost 90 deg. Now click on Target/Sine225. The period of this perturbation is near that of the spontaneous oscillations. The responses of both models look rather different from those of the monkey. As before, the response of the Tachometer Feedback model is too small (and too late). Now, however, the response of the image motion model is too large. The model resonates near the driving frequency. Increasing the saturation reduces but does not eliminate this resonance. 
+	Note that the responses of the monkey were collected when the perturbations were imposed during ongoing pursuit, when image velocity was near, but not at, zero. The average image velocity during pursuit was 1.5 - 2 deg/s for this monkey. From other behavioral results, this is expected to reduce the sinusoidal response of the monkey by about 30%. This reduction is hypothesized to result from a weakening of the acceleration pathway due to the non-zero image velocity baseline. To see the effect such a weakening would have, reduce the acceleration pathway gain by about 30%. The image motion model now captures (approximately) both the gain and phase of the monkey's response, at all 3 periods. The best fits can be obtained with the 'fit' button in the examples Whatever the acceleration gain, the tachometer feedback model always responds with too late a phase. 
+
+
+ATTEMPTING TO CORRECT THE TACHOMETER FEEDBACK MODEL
+
+ 	The tachometer feedback model fails to fit the sinusoidal data with parameters in the ballpark of those that produced good step fits. However, it can produce reasonable sinusoidal fits using very different parameters. set Velocity Delay: about 43 Acceleration Delay: about 22 Velocity Gain: as high as it goes Acceleration Gain: about 1.3 This produces responses of the correct phase, though the amplitude is still low. This can be fixed by increasing the velocity gain further. Type 'P.Gain_Vel = 32;' into the command line Turn some trace on and off to refresh the plots. The tachometer model's performance is now much like the monkey's, at all three periods. The gains and phases are all close to correct. The step response, however, is entirely unrealistic. Initial eye acceleration is far too fast, and there is no ringing at the appropriate frequency. Increasing the gain of the acceleration pathway does not produce more ringing near 5 Hz but only introduces a new, much higher frequency. 
+
+
+ACHIEVING GOOD FITS USING SATURATION 
+
+	The image motion model can also be set to fit the step data of either monkey Na or Ka when the Saturation is non-zero. The fits are typically better with some saturation, as an overshoot can be achieved without using an overly high velocity gain, which produces overshoots that are earlier than those of the monkey. use the 'fit with saturation' buttons. QUANTITATIVE FITS Ideal quantitative fits will be difficult to achieve using these simplified versions of the models, as a number of nonlinearities are missing. Do not expect better that close qualitative similarity. See Churchland and Lisberger 19XX for accurate quantitative fits to all the examples shown. 
+
+
+</textarea></p>
+
+
+
+</form>
+
+
+</BODY>
+</HTML>
+
+
+
+</body>
+</html>
+
+

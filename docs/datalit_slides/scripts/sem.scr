@@ -1,0 +1,189 @@
+# synthesize data to illustrate SEM vs. sigma
+max_warnings 2
+
+< $macro_dir/compute/gnoise.mac
+< $macro_dir/compute/tdist.mac
+< $macro_dir/view/plotsupp.mac
+
+Set sigma 0.3
+Set bar_width 0.75
+#Set h_scatter 0.2
+Assign h_scatter $bar_width*0.9
+Set eb_w 0.2
+Set plotter_name plotwin
+
+New_Plotter $plotter_name 800 600
+Set xmin -1
+Set xmax 2
+Set ymin 0
+Set ymax 3
+Set x_tick_spacing 1
+Set y_tick_spacing 1
+Set x_legend condition
+Set y_legend score
+Set x_tick_auto 1
+Set y_tick_auto 1
+Symbol Disk 3
+
+#view
+#  viewers
+#    event_action plotwin left_button_down Advance
+#    quit
+#  quit
+
+Define Advance 0
+Set ready 1
+.
+
+#Define Wait_For_Click 0
+#Set ready 0
+#do
+#  sleep 1
+#  while $ready==0
+#.
+
+Set level1	1.98
+Set level2	2.02
+
+Set sample_size 4
+Set n_reps 4
+
+Define Draw_Pts 0
+VUni pts{0}
+VSMul pts{0} pts{0} $h_scatter
+VSAdd pts{0} pts{0} -$h_scatter/2
+VMov pts{1} signal1
+Select_Pen $red
+Symbol_Plot pts
+
+VUni pts{0}
+VSMul pts{0} pts{0} $h_scatter
+VSAdd pts{0} pts{0} 1-$h_scatter/2
+VMov pts{1} signal2
+Select_Pen $blue
+Symbol_Plot pts
+.
+
+Define Draw_Bar 1 idx
+Set mean_varname mean$1
+Set sem_varname sem$1
+Assign bar_x $1-1
+Select_Pen $lt_gray
+view
+  plot $plotter_name
+    fill_polygon 4
+  	$bar_x-$bar_width/2	0
+  	$bar_x-$bar_width/2	$$mean_varname
+  	$bar_x+$bar_width/2	$$mean_varname
+  	$bar_x+$bar_width/2	0
+    quit
+  quit
+Select_Pen $black
+view
+  plot $plotter_name
+    line	$bar_x		$$mean_varname-2*$$sem_varname
+    		$bar_x		$$mean_varname+2*$$sem_varname
+    line	$bar_x-$eb_w	$$mean_varname-2*$$sem_varname
+    		$bar_x+$eb_w	$$mean_varname-2*$$sem_varname
+    line	$bar_x-$eb_w	$$mean_varname+2*$$sem_varname
+    		$bar_x+$eb_w	$$mean_varname+2*$$sem_varname
+    quit
+  quit
+.
+
+Define Delete_Vecs 0
+Delete_Image noise
+Delete_Image pts
+Delete_Image signal1
+Delete_Image signal2
+.
+
+Define Declare_Vecs 0
+Vector noise $sample_size 1 float
+Vector signal1 $sample_size 1 float
+Vector signal2 $sample_size 1 float
+Vector pts $sample_size 2 float
+.
+
+Define Init_Signal 1 index
+Set dest signal$1
+Set level_varname level$1
+VSet $dest $$level_varname
+Gaussian_Noise noise $sigma
+VVAdd $dest $dest noise
+.
+
+Define Get_Stats 5 mean_varname var_varname sigma_varname sem_varname signal
+Get_Mean $1 $5
+Get_Variance $2 $5
+Assign $3 sqrt($$2)
+Assign $4 $$3/sqrt($sample_size)
+.
+
+Set p_legend_x 1.7
+Set p_legend_y 2.8
+Set p_legend_delta_y -0.2
+
+Define Set_Stars 0
+If $p_value>0.01
+  "Set prefix '* P' exit_macro"
+If $p_value>0.001
+  Then "Set prefix '** P' exit_macro"
+  Else "Set prefix '*** P' exit_macro"
+.
+
+Define Draw_P 0
+If $p_value>0.05
+  Then "Set prefix P"
+  Else Set_Stars
+
+Print p_string
+view
+  plot $plotter_name
+    move $p_legend_x $p_legend_y
+    string "$prefix $p_string"
+    move $p_legend_x $p_legend_y+$p_legend_delta_y
+    string "N = $sample_size"
+    quit
+  quit
+.
+
+Define Init_Signals 0
+Init_Signal 1
+Init_Signal 2
+Get_Stats mean1 var1 sigma1 sem1 signal1
+Get_Stats mean2 var2 sigma2 sem2 signal2
+Assign var_pooled sqrt(($var1+$var2)/2)
+Assign t_stat ($mean1-$mean2)/($var_pooled*sqrt(2/$sample_size))
+Get_P_Value $t_stat
+echo "N $sample_size  m1 $mean1  m2 $mean2  s1 $sigma1  s2 $sigma2  sem1 $sem1  sem2 $sem2  t $t_stat  dof $n_dof  P $p_string"
+.
+
+do
+  Declare_Vecs
+  Assign n_dof 2*($sample_size-1)
+  T_Dist $n_dof
+  repeat $n_reps
+    Init_Signals
+    Erase_Plot
+    Select_Pen $black
+    Setup_Axes
+    Draw_Bar 1
+    Draw_Bar 2
+    Draw_P
+
+    # Draw bar graph & error bars here
+    Wait_For_Click
+    Draw_Pts
+
+    Wait_For_Click
+    end
+
+
+  # plot results here
+  Mul_Var sample_size 2
+  Delete_Vecs
+
+  while $sample_size<800
+
+

@@ -1,0 +1,117 @@
+max_warnings 2
+
+Set w 500
+Set h 700
+Set sw 200
+Set sh 200
+Assign x1 floor(($w-1.5*$sw)/2)
+Assign y1 floor(($h-1.5*$sh)/2)
+Assign x2 $x1+floor($sw/2)
+Assign y2 $y1+floor($sh/2)
+
+# cyan
+Set b1 255
+Set g1 255
+Set r1 0
+
+# yellow
+Set b2 0
+Set g2 255
+Set r2 255
+
+# green
+Set b3 0
+Set g3 255
+Set r3 0
+
+Set current_region 1
+
+Define SetRed 0
+Set_Component r
+.
+
+Define SetGreen 0
+Set_Component g
+.
+
+Define SetBlue 0
+Set_Component b
+.
+
+Define Set_Component 1 letter
+Assign cname ${1}$current_region
+Set $cname $slider_val
+Install_Colors
+.
+
+Define SetRegion 0
+Set current_region $choice
+Update_Sliders
+.
+
+Define Update_Slider 2 slider_name key_char
+Set cname ${2}$current_region
+interface
+  decorate control_panel
+    set_scale $1 $$cname
+    quit
+  quit
+.
+
+Define Update_Sliders 0
+Update_Slider Red r
+Update_Slider Green g
+Update_Slider Blue b
+.
+
+Viewer test_window $w $h
+interface
+  panel control_panel 400 $h
+  decorate control_panel
+    chooser Region SetRegion 3 1 2 3
+    set_choice Region $current_region
+    adjuster Red SetRed 0 255 $r1
+    adjuster Green SetGreen 0 255 $g1
+    adjuster Blue SetBlue 0 255 $b1
+    button Quit exit
+    quit
+  control
+    show control_panel
+    quit
+  quit
+
+Posn_Window test_window 0 0 
+Posn_Window control_panel 20+$w 0 
+
+Image bgr $h $w 3 u_byte
+Vector lut 256 3 u_byte
+Subvector use_lut lut 4 0
+Image m $h $w 1 u_byte
+Subimage r1 m $sw $sh $x1 $y1
+Subimage r2 m $sw $sh $x2 $y2
+Image r $sh $sw 1 u_byte
+VSet r 2
+
+VSet m 0
+VSet r1 1
+VVAdd r2 r2 r
+
+Define Install_Colors 0
+data ascii
+  read lut[0] - 255 255 255
+  read lut[1] - $b1 $g1 $r1
+  read lut[2] - $b2 $g2 $r2
+  read lut[3] - $b3 $g3 $r3
+  quit quit
+
+Map bgr m lut
+Show_Bytes bgr test_window
+.
+
+Install_Colors
+
+do
+  os events quit
+  while 1
+
+#Pause

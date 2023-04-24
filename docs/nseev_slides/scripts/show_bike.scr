@@ -1,0 +1,41 @@
+
+Set f ../images/night_bike1.jpg
+Read_File_Header $f
+Assign h nrows('$f')
+Assign w ncols('$f')
+Image i1 $h $w 3 u_byte
+Image i2 $h $w 3 u_byte
+Image b1 $h*2 $w*2 3 u_byte
+Image b2 $h*2 $w*2 3 u_byte
+Get_Next i1 $f
+Set f ../images/night_bike3.jpg
+Read_File_Header $f
+Get_Next i2 $f
+Enlarge b2 i2
+
+Define LClick 0
+If $left_button_up "PopFile 2 nop"
+Set clicked 1
+.
+
+
+Viewer_For v b1
+Set_Button_Actions v LClick nop nop
+Enlarge b1 i1
+Show_Bytes b1 v
+#Pause
+Wait_For_Click
+
+Set clicked 0
+do
+  Show_Bytes b2 v
+  usleep 1000000
+  Show_Bytes b1 v
+  usleep 33000
+  os events quit
+  while !$clicked
+Show_Bytes b1 v
+Wait_For_Click
+exit
+
+

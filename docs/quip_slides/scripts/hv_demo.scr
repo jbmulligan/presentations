@@ -1,0 +1,91 @@
+#
+
+< $macro_dir/view/plotsupp.mac
+< adjuster.mac
+Background_Viewer
+
+Image rgb 512 512 3 u_byte
+Viewer_For g_v rgb
+Posn_Window g_v 450 100
+
+interface
+  panel grating_panel 360 300
+  decorate grating_panel
+    adjuster H_level SetHLevel 0 255 255
+    adjuster V_level SetVLevel 0 255 255
+    button QUIT exit
+    quit
+  control
+    show grating_panel
+    quit
+  quit
+Posn_Window grating_panel 30 100
+
+Set patch_h 100
+Set patch_w 100
+
+VSet rgb 0
+Image patch $patch_h $patch_w 3 u_byte
+VSet patch 0
+Interlace oddlines patch odd
+
+Set x1 156
+Set x2 256
+
+Subimage p1 rgb $patch_w $patch_h $x1 56
+Subimage p2 rgb $patch_w $patch_h $x2 56
+Subimage p3 rgb $patch_w $patch_h $x1 156
+Subimage p4 rgb $patch_w $patch_h $x2 156
+Subimage p5 rgb $patch_w $patch_h $x1 256
+Subimage p6 rgb $patch_w $patch_h $x2 256
+Subimage p7 rgb $patch_w $patch_h $x1 356
+Subimage p8 rgb $patch_w $patch_h $x2 356
+
+Define SetHLevel 0
+Assign h_level $slider_val
+Set_Levels $h_level $v_level
+.
+
+Define SetVLevel 0
+Assign v_level $slider_val
+Set_Levels $h_level $v_level
+.
+
+Define Set_Levels 2 h_level v_level
+VSet oddlines $1
+VMov p1 patch
+VSet oddlines $2
+Transpose p2 patch
+
+VSet oddlines 0
+VSet oddlines{2} $1
+VMov p3 patch
+VSet oddlines{2} $2
+Transpose p4 patch
+
+VSet oddlines 0
+VSet oddlines{1} $1
+VMov p5 patch
+VSet oddlines{1} $2
+Transpose p6 patch
+
+VSet oddlines 0
+VSet oddlines{0} $1
+VMov p7 patch
+VSet oddlines{0} $2
+Transpose p8 patch
+
+Show_Bytes rgb g_v
+.
+
+Set h_level 255
+Set v_level 255
+Set_Levels $h_level $v_level
+
+do
+  os events quit
+  while 1
+
+Pause
+
+

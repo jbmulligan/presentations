@@ -1,0 +1,26 @@
+#!/bin/csh
+#
+# Display pictures of Lee and Brent...
+
+Set d $HOME/working/public_html/home/presentations/sni_slides/images
+
+Hips_Read_Directory $d
+
+Set f AlonsoVera.jpg
+Read_File_Header $f
+Dup_UByte img1 $f
+
+Get_Next img1 $f
+Rotate_Colors img1
+
+Set zoom 3
+Viewer v1 $zoom*ncols(img1) $zoom*nrows(img1)
+Posn_Window v1 230 400
+Label_Viewer v1 "Alonso Vera"
+
+Disp_Bytes img1 v1
+
+do
+  os events quit
+  usleep 333
+  while 1

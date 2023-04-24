@@ -1,0 +1,30 @@
+#max_warnings -1
+max_warnings 2
+< $macro_dir/view/plotsupp.mac	# get color defs
+< adjuster.mac
+< anstis_demo.mac
+
+view quit	# init default display
+
+Declare_Images
+Paint_Strips strips
+Paint_Strips key_strips
+Setup_Luts 127 127 0 127 -127 0 1 -1 0
+Map_Stripes
+
+Init_Demo_Viewers
+Draw_Adjuster_Arrows $yellow $red $green
+Anstis_Panel
+Show_Bytes key_frm key_v
+
+Set delta_r 127
+Set delta_g -127
+
+# There is a trick to checking events within an event driven macro!?
+# what is it???
+
+do
+  os events quit
+  Cycle_It 1 $delay
+  while 1
+

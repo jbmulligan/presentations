@@ -1,0 +1,19 @@
+
+If $argc!=3 "error_exit 'usage:  coq outfile infile columns_to_trim < trim.scr'"
+
+Set n_trim $3
+Set infile $2
+Set outfile $1
+
+Read_File_Header $infile
+Image b nrows('$infile') ncols('$infile') depth('$infile') u_byte
+Get_Next b $infile
+Subimage s b ncols(b)-$n_trim nrows(b) 0 0
+
+Clobber yes
+Write_File_Header $outfile 1
+Put_Next s $outfile
+
+exit
+
+

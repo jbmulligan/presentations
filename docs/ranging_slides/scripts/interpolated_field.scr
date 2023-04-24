@@ -1,0 +1,68 @@
+#
+# vt script to illustrate light fields...
+
+< fields.mac
+< $macro_dir/war/gaussian.mac
+
+Viewer top_view 400 400
+Viewer top_view2 400 400
+view wait top_view2 quit
+Posn_Viewer top_view 500 40
+view xsync yes quit
+Posn_Viewer top_view2 50 40
+Set_Colors
+
+Image ball_bm 16 16 1 bit
+Image ball_img 16 16 1 u_byte
+
+Image f 200 200 3 float
+Image g 200 200 1 float
+Image b 200 200 1 u_byte
+Image h 200 200 1 float
+
+Set xc 200
+Set yc 50
+
+Set rad 10
+
+#Vector xy 40 2 float
+
+Set d0 120
+
+Image f1 400 400 1 float
+Image c1 400 400 1 float
+Image f2 400 400 1 float
+Image c2 400 400 1 float
+Image f3 400 400 1 float
+Image c3 400 400 1 float
+Image f4 400 400 1 float
+Image c4 400 400 1 float
+Image f5 400 400 1 float
+Image c5 400 400 1 float
+
+
+Define Tryit 1 delta
+Label_Viewer top_view2 "working..."
+Label_Viewer top_view "working..."
+Assign _tdx $1
+Render_Near_Field f3 c3 0 100 800
+Disp_Gray c3 top_view2
+Label_Viewer top_view2 "Single source at x = 0"
+Render_Near_Field f1 c1 $_tdx 100 800
+Render_Near_Field f2 c2 -$_tdx 100 800
+VVAdd f4 f1 f2
+VSMul f4 f4 0.5
+Get_Contours c4 f4
+Disp_Gray c4 top_view
+Label_Viewer top_view "Two sources at x = +-$_tdx"
+Wait_For_Up_Click
+.
+
+Tryit floor(ncols(top_view)/3)
+Tryit floor(ncols(top_view)/15)
+
+exit
+
+MoveIt Ball_At
+Set show_second_field 1
+MoveIt Ball_At

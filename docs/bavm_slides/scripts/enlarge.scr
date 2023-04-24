@@ -1,0 +1,27 @@
+#
+Set dir $HOME/pl4/movies
+Set file s1.hips2
+Set outfile big_s1.hips2
+
+Set out_frames 500
+
+Hips_Read_Directory $dir
+Hips_Write_Directory $dir
+Read_File_Header $file
+Write_File_Header $outfile $out_frames
+
+Image b nrows('$file') ncols('$file') 1 u_byte
+Image bb 2*nrows('$file') 2*ncols('$file') 1 u_byte
+Image f nrows('$file') ncols('$file') 1 float
+
+Viewer v 2*ncols('$file') 2*nrows('$file')
+#Pause
+
+repeat nframes('$file')
+  Get_Next b $file
+  Enlarge bb b
+  Put_Next bb $outfile
+  #Convert 
+  Show_Bytes bb v
+  end
+

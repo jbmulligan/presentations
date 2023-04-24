@@ -1,0 +1,143 @@
+# vt script to illustrate Shu-Chieh's paradigm
+
+view
+  xsync yes
+  quit
+
+Set sz 600
+Viewer stimulus_window $sz $sz
+Posn_Window stimulus_window 300 60
+view
+  draw stimulus_window
+    remember no
+    quit
+  quit
+
+Image stim $sz $sz 3 u_byte
+VSet stim 255
+
+Set sw 10
+Assign sl 2*$sw
+Assign ss 3*$sw
+Assign radius 0.35*$sz
+
+Assign center_x $sz/2
+Assign center_y $sz/2
+
+Vector locations 8 2 float
+Vector angle 8 1 float
+Ramp1D angle 0 atan(1)
+VCos locations{0} angle
+VSin locations{1} angle
+VSMul locations locations $radius
+VSAdd locations locations $sz/2
+VRound locations locations
+
+
+Define Landolt 4 target x y orientation
+#advise "Landolt $1 $2 $3 $4"
+#advise "Subimage inset $1 $ss $ss $2 $3"
+Subimage inset $1 $ss $ss $2 $3
+VSet inset 0
+If $4==0 "Subimage _strip inset $sl $sw $sw $sw"		# strip on right
+If $4==1 "Subimage _strip inset $sw $sl $sw $sw"		# strip on bottom
+If $4==2 "Subimage _strip inset $sl $sw 0   $sw"		# strip on left
+If $4==3 "Subimage _strip inset $sw $sl $sw 0"			# strip on top
+VSet _strip 255
+Delete_Image _strip
+Delete_Image inset
+.
+
+Set red 42
+Set green 43
+Set blue 44
+Setcolor $red 255 0 0
+Setcolor $green 0 255 0
+Setcolor $blue 0 100 255
+Set radius 30
+Vector color_list 8 1 int32
+
+Define Draw_Circles 0
+
+Set i 0
+repeat 8
+  Assign cx value(locations[$i]{0})-$radius+$ss/2
+  Assign cy value(locations[$i]{1})-$radius+$ss/2
+  view draw stimulus_window
+    #advise "foreground 255 0 0"
+    foreground value(color_list[$i])
+    #advise "arc $cx $cy 100 100 0 36000"
+    Assign r $radius
+    Assign cx round(value(locations[$i]{0})-$r+$ss/2)
+    Assign cy round(value(locations[$i]{1})-$r+$ss/2)
+    arc $cx $cy round(2*$r) round(2*$r) 0 36000
+    arc $cx+1 $cy round(2*$r) round(2*$r) 0 36000
+    arc $cx-1 $cy round(2*$r) round(2*$r) 0 36000
+    arc $cx $cy+1 round(2*$r) round(2*$r) 0 36000
+    arc $cx $cy-1 round(2*$r) round(2*$r) 0 36000
+  
+  quit quit
+  Increment i
+  end
+.
+
+Define New_Stim 3 start_color distractor_color auto_advance
+Label_Viewer stimulus_window "Click to present next stimulus"
+Wait_For_Up_Click
+Set i 0
+repeat 8
+  Assign which random(3)
+  Landolt stim value(locations[$i]{0}) value(locations[$i]{1}) $which
+  Increment i
+  end
+Show_Bytes stim stimulus_window
+VSet color_list $1
+Draw_Circles
+If $3
+  Then "sleep 1"
+  Else "Label_Viewer stimulus_window 'Click to present 2nd stimulus frame' Wait_For_Up_Click"
+Assign i random(7)
+VSet color_list $red
+VSet color_list[$i] $green
+do
+  Assign j random(7)
+  while $j==$i
+VSet color_list[$j] $2
+Draw_Circles
+If $3
+  Then "sleep 1"
+  Else "Label_Viewer stimulus_window 'Click to blank 2nd stimulus frame' Wait_For_Up_Click"
+VSet stim 255
+Show_Bytes stim stimulus_window	# blank screen
+.
+
+New_Stim $red $red 0
+
+New_Stim $red $red 1
+New_Stim $red $red 1
+New_Stim $red $red 1
+
+New_Stim $green $red 0
+New_Stim $green $red 1
+New_Stim $green $red 1
+
+New_Stim $red $blue 0
+New_Stim $red $blue 1
+New_Stim $red $blue 1
+
+New_Stim $green $blue 0
+New_Stim $green $blue 1
+New_Stim $green $blue 1
+
+New_Stim $blue $blue 0
+New_Stim $blue $blue 1
+New_Stim $blue $blue 1
+
+exit
+
+repeat 3
+  New_Stim
+  Wait_For_Up_Click
+  end
+
+

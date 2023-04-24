@@ -1,0 +1,37 @@
+view quit
+Viewer bg_v ncols('$DISPLAY') nrows('$DISPLAY')
+Image bg nrows(bg_v) ncols(bg_v) 3 u_byte
+VSet bg 0
+Posn_Window bg_v 0 0
+Show_Bytes bg bg_v
+
+Assign theta asin(0.5)	# 30 degrees
+Assign h 512
+Assign w round($h/cos($theta))
+
+Viewer v $w $h
+Posn_Viewer v floor((ncols(bg_v)-$w-10)/2)
+		floor((nrows(bg_v)-$h-30)/2)
+Set_Button_Actions v exit exit exit
+
+Image f $h $w 1 float
+
+Image f_rgb $h $w 3 float
+Image rgb $h $w 3 u_byte
+
+Ramp2D f 255 0 -1
+VMov f_rgb{0} f
+
+Ramp2D f 0 cos($theta) sin($theta)
+VMov f_rgb{1} f
+
+Ramp2D f 0 -cos($theta) sin($theta)
+VMov f_rgb{2} f
+
+Convert rgb f_rgb
+Show_Bytes rgb v
+Show_Bytes bg bg_v
+
+Idle
+
+Pause

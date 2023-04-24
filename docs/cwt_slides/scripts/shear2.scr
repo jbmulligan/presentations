@@ -1,0 +1,42 @@
+# Make the trefoil def field?
+#
+# In polar coords, axial velocity v_a and tangential velocity v_t
+# positive v_a is outward, positive v_t is ccw
+#
+# v_x = v_a cos theta - v_t sin theta
+# v_y = v_a sin theta + v_t cos theta
+
+Set demo_stem recip
+
+< config.scr
+< demo_gui.mac
+< $macro_dir/compute/nfilter.mac
+
+Declare_Stim_Viewer
+
+< default_params.scr
+
+Demo_GUI_1
+
+Declare_Demo_Objs
+
+
+Recompute_Texture
+Show_Image texture stim_v
+
+Init_Base_Coords
+
+Set h_shear_amp 0
+Set v_comp_amp 1
+Recompute_Modulator
+
+Set amp 10
+
+Update_T_Period
+Set t_arg 0
+
+do
+  os events quit	# check for gui events
+  Update_Shear_Stim
+  while 1
+
