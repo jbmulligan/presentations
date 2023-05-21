@@ -1,0 +1,33 @@
+
+Set zoom 3
+
+Set infile ../movies/pupret.jpg
+Read_File_Header $infile
+fileio
+  autoclose $infile no
+  quit
+
+Set v 'Pupil_Retina_Comparison'
+Set n_trim 10	# trim rows from bottom
+Viewer $v $zoom*ncols('$infile') $zoom*(nrows('$infile')-$n_trim)
+Set_Button_Actions $v exit nop nop
+
+Image buf nrows('$infile') ncols('$infile') depth('$infile') u_byte
+Subimage use_buf buf ncols(buf) nrows(buf)-$n_trim 0 0
+
+
+Assign nf nframes('$infile')
+
+Set slow_factor 1
+
+do
+  File_Seek $infile 0
+  repeat $nf
+    Get_Next buf $infile
+    Disp_Bytes use_buf $v
+
+    os events quit
+    usleep 16600*$slow_factor
+    end
+  while 1
+

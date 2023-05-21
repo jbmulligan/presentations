@@ -1,0 +1,172 @@
+#
+# make a real barber pole
+#
+
+max_warnings 2
+
+< bpole.mac
+
+Set nframes 32
+
+# a = sin(y)
+# x = cos(a)
+# z=sin(a)
+
+Set n_twists 2
+Set n_stripes 4
+Set temporal_period 32	# frames
+
+Set pole_width		200
+Set pole_height		400
+
+Set viewer_width	400
+Set viewer_height 600
+
+Set i_w $viewer_width
+Set i_h $viewer_height
+
+
+Define Update_Fractions 0
+Assign pole_width_fraction $pole_width/$viewer_width	# in screens
+Assign pole_height_fraction $pole_height/$viewer_height
+.
+
+Set vwr_name 'Barber_Pole'
+Viewer $vwr_name $viewer_width $viewer_height
+advise "Setting GL window..."
+gl window $vwr_name quit
+#Posn_Window $vwr_name 3000 100
+Posn_Window $vwr_name 50 50
+
+advise "Setting up cuda..."
+platforms
+  select $DEFAULT_PLATFORM $DEFAULT_GPU
+  quit
+#cuda
+#  cuda_gl
+#    viewer $vwr_name
+#    # BUG this device is specific to mach iMac
+#    #buffer bgrat GeForce_GTX_680MX $i_w $i_h 4
+#    buffer bgrat $DEFAULT_CUDA_DEVICE $i_w $i_h 4
+#    quit
+#  quit
+gl
+#  window $vwr_name
+  gl_buffer bgrat $DEFAULT_PLATFORM $DEFAULT_GPU $i_w $i_h 4
+  quit
+
+view
+  viewers
+    platform_viewer $vwr_name
+    quit
+  quit
+
+Image y $viewer_height $viewer_width 1 float
+Dup_Float x y
+Dup_Float xx y
+Dup_Float z y
+Dup_Float a y
+Dup_Float p1 y
+Dup_Float p2 y
+Dup_Float final y
+Dup_Complex c y
+
+Define SetPoleW 0
+Set pole_width $slider_val
+Update_Fractions
+.
+
+Define SetPoleH 0
+Set pole_height $slider_val
+Update_Fractions
+.
+
+Define SetNStripes 0
+Set n_stripes $slider_val
+.
+
+Define SetNTwists 0
+Set n_twists $slider_val
+.
+
+Define SetTP 0
+Set temporal_period $slider_val
+Assign arginc1 8*atan(1)/$temporal_period
+.
+
+Define Update_Pole 0
+Make_Pole p1 $n_stripes $n_twists $arg1 $x1
+# Can we do fixed scaling???
+#Scale p1 0 1
+#  VSMul p1 p1 0.5
+#  VSAdd p1 p1 0.5
+
+  #VSqrt p1 p1
+#  VSAdd p1 p1 -0.5
+#  VSMul p1 p1 10
+# we multiply up and then clip to get
+# a hard edge...
+VSMul p1 p1 20
+#Clip p1 p1 1
+VSMin p1 p1 1
+VSMax p1 p1 -1
+#Scale p1 0 255
+# Scale to byte range
+VSMul p1 p1 127
+VSAdd p1 p1 127
+# BGR, to get red and white we put the signal on B and G
+If !obj_exists(tb) "Dup_UByte tb bgrat{0}"
+Convert tb p1
+Convert bgrat{0} p1
+#Convert bgrat{1} p1
+#VMov bgrat{0} tb
+VMov bgrat{1} tb
+VSet bgrat{2} 255	# red and white
+Mask_At bgrat $x1
+.
+
+Posn_Window $vwr_name 50 50
+Set p 'Barber pole control panel'
+interface
+  panel $p $viewer_width $viewer_height
+  decorate $p
+    adjuster 'Pole width' SetPoleW 20 300 $pole_width
+    adjuster 'Pole height' SetPoleH 20 500 $pole_height
+    adjuster "Number of stripes" SetNStripes 1 12 $n_stripes
+    adjuster "Number of twists" SetNTwists 1 12 $n_twists
+    adjuster "Temporal period" SetTP 4 160 $temporal_period
+    button Quit exit
+    quit
+  control
+    show $p
+    quit
+  quit
+Posn_Window $p $viewer_width+100 50
+
+Update_Fractions
+
+Ramp2D y 0 0 1
+
+#Set x1 1/8
+Assign x1 ($viewer_width-$pole_width)/2
+Print x1
+Set arg1 0
+Assign arginc1 8*atan(1)/$temporal_period
+
+Print nframes
+
+#repeat $nframes
+do
+  os events quit
+  Update_Pole
+#  Show_Bytes rgb $vwr_name
+#  cuda cuda_gl load $vwr_name bgrat quit quit
+  view platform_load $vwr_name bgrat quit
+  gl swap_buffers quit
+
+  Add_Var arg1 $arginc1
+#  usleep 16000
+  while 1
+
+< /dev/tty
+

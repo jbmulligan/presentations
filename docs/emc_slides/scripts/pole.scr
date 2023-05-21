@@ -1,0 +1,204 @@
+# interactive demo for continuous barber pole
+max_warnings 2
+
+< $macro_dir/compute/gaussian.mac
+
+Set v_w	512
+Set v_h 512
+
+Set i_w 512
+Set i_h 512
+
+
+Viewer v $v_w $v_h
+gl window v quit
+view
+  viewers
+    platform_viewer v
+    quit
+  quit
+
+#Posn_Window v 3000 100
+Posn_Window v 50 50
+
+Image h_dmat $i_h $i_w 1 float
+
+platforms
+  select $DEFAULT_PLATFORM $DEFAULT_GPU
+  quit
+
+#cuda
+#  cuda_gl
+#    viewer v
+#    buffer bgrat $DEFAULT_CUDA_DEVICE $i_w $i_h 4
+#    quit
+#  quit
+
+gl
+  window v
+  gl_buffer bgrat $DEFAULT_PLATFORM $DEFAULT_GPU $i_w $i_h 4
+  quit
+
+Image window $i_h $i_w 1 float
+Dup_Float grating window
+Dup_Float q_grating window
+Dup_Float q_error window
+Dup_Float dmat window	# for ordered dither
+Image bm $i_h $i_w 1 bit
+expressions
+  export q_grating
+  export q_error
+  export dmat
+  quit
+
+# This function doesn't run on the gpu!?
+Set dither_size 4
+compute misc dither h_dmat $dither_size quit quit
+#cuda upload dmat h_dmat quit
+platforms upload dmat h_dmat quit
+# matrix goes from 0-15
+VSMul dmat dmat 1/($dither_size*$dither_size)
+VSAdd dmat dmat 1/(2*$dither_size*$dither_size)
+
+Define SetTF 0
+Assign tfreq $slider_val/10
+Assign tdelta $twopi*$tfreq/$frame_rate
+.
+
+Define SetSF 0
+Assign sf $slider_val/10
+Update_Grating
+.
+
+Define SetGAng 0
+Set grating_ang $slider_val
+Update_Grating
+.
+
+Assign twopi 8*atan(1)
+Print twopi
+
+Set min_sf 0.2
+Assign max_sf $i_h/8	# minimum period of 8 pixels
+Set sf 16
+Set grating_ang	0
+Set tfreq 1
+
+Set tphase 0
+Set frame_rate 60
+Assign tdelta $twopi*$tfreq/$frame_rate
+
+
+Define Update_Grating 0
+# want the 0 phase in the center...
+Assign arg $grating_ang*$twopi/360
+Assign cfact cos($arg)
+Assign sfact sin($arg)
+Assign period $i_h/$sf	# period in pixels: pix/img / cyc/img = pix/cyc
+Assign delta $twopi/$period
+Assign ydelta $delta*$cfact
+Assign xdelta $delta*$sfact
+Assign start 0-$ydelta*($i_h/2)-$xdelta*($i_w/2)
+Ramp2D grating $start $xdelta $ydelta
+VSAdd grating grating $tphase
+# add phase here...
+VCos grating grating
+#Disp_Image grating v
+VVMul grating grating window
+
+VSMul grating grating 127
+VSAdd grating grating 127.5
+
+# just for testing
+#Ramp2D grating 0 1/$i_w 0
+
+VFloor q_grating grating
+VVSub q_error grating q_grating	# quantization error
+
+veclib
+  execute vvm_gt bm q_error dmat
+  execute vss_slct bm q_error 1 0
+  quit
+VVAdd q_grating q_grating q_error
+##expressions
+##  read -
+##  q_grating = q_grating > dmat ? 1 : 0;
+##  end
+##  quit
+##VSMul q_grating q_grating 255
+
+#Info bgrat
+#Info q_grating
+# bgrat has four components, so a slow loop is required
+# to do this...
+
+#Convert bgrat q_grating
+Convert bgrat{0} q_grating
+Convert bgrat{1} q_grating
+Convert bgrat{2} q_grating
+
+#cuda
+#  cuda_gl
+#    load v bgrat
+#    quit
+#  quit
+view
+  platform_load v bgrat
+  quit
+gl
+  swap_buffers
+  quit
+.
+
+Set window_angle 10
+Set sigma 15
+Set aspect 2
+
+Define Update_Window 0
+Gaussian_2D_R window $sigma $sigma/$aspect $window_angle
+.
+
+Define SetSigma 0
+Set sigma $slider_val
+Update_Window
+.
+
+Define SetAspect 0
+Assign aspect $slider_val/10
+Update_Window
+.
+
+Define SetWAng 0
+Set window_angle $slider_val
+Update_Window
+.
+
+Update_Window
+Update_Grating
+
+Set p 'Barber pole parameters'
+interface
+  panel $p 512 640
+  decorate $p
+    adjuster 'Spatial Frequency x 10 (cyc/image)' SetSF 10*$min_sf 10*$max_sf 10*$sf
+    adjuster 'Grating angle (deg)' SetGAng -90 90 $grating_ang
+    adjuster 'Temporal frequency x 10 (Hz)' SetTF 1 150 $tfreq
+    adjuster 'Window sigma' SetSigma 10 200 $sigma
+    adjuster 'Aspect Ratio x 10' SetAspect 10 100 10*$aspect
+    adjuster 'Window angle (def)' SetWAng -90 90 $window_angle
+    button QUIT exit
+    quit
+  control
+    show $p
+    quit
+  quit
+Posn_Window $p 600 50
+
+do
+  os events quit
+  # need to sync w/ refresh!
+  Add_Var tphase $tdelta
+  Update_Grating
+
+  while 1
+

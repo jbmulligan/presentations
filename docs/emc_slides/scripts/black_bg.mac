@@ -1,0 +1,25 @@
+# For some reason, when we try to black the entire display using
+# a full-sized window, this works from the shell but hangs from the browser...
+
+Define Black_BG 0
+view
+  displays
+    tell default_display
+    quit
+  quit
+#output_file /tmp/bg_output
+#echo "Black_BG BEGIN"
+# get the size of the display
+view displays list quit quit
+Assign dw ncols('$default_display')
+Assign dh nrows('$default_display')
+Viewer bg $dw $dh
+Image blk $dh $dw 1 u_byte
+VSet blk 0
+Show_Bytes blk bg
+.
+
+Define ReBlack 0
+Show_Bytes blk bg
+.
+

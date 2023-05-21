@@ -1,0 +1,79 @@
+
+Start_File bpole.mac
+
+echo makeang
+
+# This makes the angle of the pole surface at each image point?
+#
+#     . x        O
+#     .
+#       p        z
+#        .
+#         .
+#          ......             can't draw a circle w/ ascii...
+
+Define Make_Angle 3 target start ntwists
+Ramp2D x -1/$pole_width_fraction (2/$pole_width_fraction)/ncols('$1') 0
+VVMul xx x x
+VSSub xx xx 1	# 1 is the cylinder radius
+VSMax xx xx 0
+
+VSqrt z xx
+VMov c{0} x
+VMov c{1} z
+#VAtn2 $1 c
+VAtan2 $1 c{0} c{1}
+VSMul $1 $1 2*$3
+.
+
+echo makepole
+
+Define Make_Pole 5 target nstripes ntwists phase start_posn
+Ramp2D y 0 0 8*atan(1)*$2/nrows('$1')
+Set nt $3
+Set st $5
+Make_Angle a $st $nt
+VVAdd y y a
+VSAdd y y $4
+VCos $1 y
+.
+
+echo maskat
+
+# why are there two subimages???
+# We mask the sides...
+
+Define Mask_At 2 target posn
+Assign left_width ceil(($viewer_width-$pole_width)/2)
+Assign right_width $left_width
+Assign top_width ceil(($viewer_height-$pole_height)/2)
+Assign bot_width $top_width
+data
+  subimage s1 $1 $left_width nrows('$1') 0 0
+  subimage s2 $1 $right_width nrows('$1') ncols('$1')-$right_width 0
+  subimage s3 $1 ncols('$1') $top_width 0 0
+  subimage s4 $1 ncols('$1') $bot_width 0 nrows('$1')-$bot_width
+  quit
+# for low cuda comp cap
+Set comp 0
+repeat 3
+  VSet s1{$comp} 0
+  VSet s2{$comp} 0
+  VSet s3{$comp} 0
+  VSet s4{$comp} 0
+  Increment comp
+  end
+
+#VSet s1 0
+#VSet s2 0
+#VSet s3 0
+#VSet s4 0
+Delete_Image s1
+Delete_Image s2
+Delete_Image s3
+Delete_Image s4
+.
+
+
+Stop_File bpole.mac
+
