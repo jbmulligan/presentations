@@ -1,4 +1,4 @@
 #
-cd $HOME/exps/uhco02/demos
+cd $HOME/working/experiments/uhco02/demos
 $QUIP < dual.scr
 
