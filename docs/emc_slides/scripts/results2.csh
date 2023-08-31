@@ -1,6 +1,6 @@
 #!/bin/csh
 
-cd $HOME/exps/uhco02/eyemov
+cd $JBM_EXP_DIR/uhco02/eyemov
 setenv PROJECT uhco02
 setenv EYE_CAMERA_INDEX 2
 setenv DEBUG_LEVEL 0

@@ -60,7 +60,8 @@
 				<dict>
 					<key>COMMAND_STRING</key>
 					<string>echo "starting $1" &gt; /tmp/run_script_msgs
-/bin/tcsh $1</string>
+/bin/tcsh $1
+exit</string>
 					<key>CheckedForUserDefaultShell</key>
 					<true/>
 					<key>inputMethod</key>
@@ -96,6 +97,8 @@
 				</array>
 				<key>OutputUUID</key>
 				<string>AE536DAD-2CAB-4B8F-A172-D0B926DB9DBC</string>
+				<key>ShowWhenRun</key>
+				<false/>
 				<key>UUID</key>
 				<string>4F33B16A-D9D1-4A3B-8F23-3B52E5A70F26</string>
 				<key>UnlocalizedApplications</key>
