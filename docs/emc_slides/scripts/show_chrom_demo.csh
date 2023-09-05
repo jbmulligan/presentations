@@ -1,9 +1,11 @@
 #!/bin/csh
+echo "BEGIN show_chrom_demo.csh"
 
 # We have to install the signal file...
 #set echo
 
-cd $HOME/exps/pulfrich/demos
+setenv JBM_EXP_DIR $HOME/working/experiments
+cd $JBM_EXP_DIR/pulfrich/demos
 
 setenv PROJECT pulfrich
 setenv DEBUG_LEVEL 0

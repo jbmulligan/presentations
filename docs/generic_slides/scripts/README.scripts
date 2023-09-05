@@ -1,0 +1,7 @@
+
+Getting a local shell script to run from a browser link is a bit tricky.
+The browser has to be configured to perform a specific action on the filetype
+(I have used .csh).  I should have documented this better, but I believe
+I created an app called run_script using the Mac's Automator, it is passed the
+path the the script that we want to run.
+

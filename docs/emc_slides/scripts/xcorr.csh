@@ -1,5 +1,5 @@
 #!/bin/csh
-cd $HOME/working/experiments/pulfrich/eyemov
+cd $JBM_EXP_DIR/pulfrich/eyemov
 setenv PROJECT pulfrich
 setenv DEBUG_LEVEL 1
 setenv EYE_CAMERA_INDEX 0
