@@ -1,0 +1,80 @@
+
+Set stim_w 512
+Set stim_h 512
+Set zoom 4
+Assign pat_w $stim_w/$zoom
+Assign pat_h $stim_h/$zoom
+
+Image bdisp $stim_h $stim_w 1 u_byte
+
+Image g1 $pat_h $pat_w 1 float
+Image g2 $pat_h $pat_w 1 float
+Image f $pat_h $pat_w 1 float
+Image b1 $pat_h $pat_w 1 u_byte
+Image b2 $pat_h $pat_w 1 u_byte
+Image b3 $pat_h $pat_w 1 u_byte
+Image btmp $pat_h $pat_w 1 u_byte
+Vector map 256 1 float
+VSet map 0
+VSet map[0] 0
+VSet map[1] 150
+VSet map[2] 150
+VSet map[3] 255
+
+VUni g1
+VUni g2
+expressions
+  export g1
+  export g2
+  export btmp
+  export b1
+  export b2
+  read -
+
+  btmp = g1 > 0.5 ? 1 : 0;
+  b1 = btmp;
+  btmp = g2 > 0.5 ? 2 : 0;
+  b2 = btmp;
+  end
+
+  quit
+
+Viewer_For v1 bdisp
+
+Define Animate 0
+Set delta 0
+repeat 256
+  Scroll b3 b1 $delta 0
+  Scroll btmp b2 -$delta 0
+  VVAdd b3 b3 btmp
+  Map_B f b3 map
+  Convert btmp f
+  Enlarge bdisp btmp
+  Show_Bytes bdisp v1
+  Increment delta
+  end
+Pause
+.
+
+Animate
+
+VSet map[0] 0
+VSet map[1] 255
+VSet map[2] 200
+VSet map[3] 200
+Animate
+
+VSet map[0] 0
+VSet map[1] 255
+VSet map[2] 255
+VSet map[3] 255
+Animate
+
+VSet map[0] 0
+VSet map[1] 255
+VSet map[2] 255
+VSet map[3] 0
+Animate
+
+
+
