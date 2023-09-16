@@ -40,6 +40,9 @@ expressions
   quit
 
 Viewer_For v1 bdisp
+Wait_For_Down_Click
+Posn_Viewer v1 200 150
+Wait_For_Down_Click
 
 Define Animate 0
 Set delta 0
@@ -53,7 +56,7 @@ repeat 256
   Show_Bytes bdisp v1
   Increment delta
   end
-Pause
+Wait_For_Down_Click
 .
 
 Animate
@@ -77,4 +80,5 @@ VSet map[3] 0
 Animate
 
 
+exit
 
