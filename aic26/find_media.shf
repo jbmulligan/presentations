@@ -1,0 +1,8 @@
+#!/bin/csh
+which tar
+find_images *.htm* | sort | uniq > image_files.txt
+set n=`cat image_files.txt | wc -l`
+echo $n files found
+#tar cfz image_files.tgz `cat image_files.txt`
+tar cf image_files.tar `cat image_files.txt`
+

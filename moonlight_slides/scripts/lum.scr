@@ -1,0 +1,150 @@
+allow_events
+
+Set flick_half_period 67000
+Set size 512
+Set panel_h 250
+Set stripe_width 32
+Set fade_max 0.30
+#Set stripe_width 2
+Assign twopi 8*atan(1)
+
+Set r_mod 50
+Set g_mod 25
+
+Set p 'Control panel'
+interface
+  panel $p $size $panel_h
+  decorate $p
+    adjuster 'R modulation' SetR 0 127 $r_mod
+    adjuster 'G modulation' SetG 0 127 $g_mod
+    button Next Next_Demo
+    button Quit exit
+    quit
+  quit
+
+Set demo_idx 0
+Set n_demos 4
+
+Define Next_Demo 0
+Set flickering 0
+Increment demo_idx
+If $demo_idx>$n_demos 'advise "No more demos" exit_macro'
+Set demo_name Demo$demo_idx
+$demo_name
+.
+
+Define Show_The_Panel 0
+interface
+  control
+    show $p
+    dispatch
+    quit
+  quit
+Posn_Window $p 100 $size+100
+.
+
+Define SetR 0
+advise 'SetR BEGIN'
+Set r_mod $slider_val
+Update_Stripes
+If $flickering Init_Flicker
+.
+
+Define SetG 0
+Set g_mod $slider_val
+Update_Stripes
+If $flickering Init_Flicker
+.
+
+# image is really BGR
+
+Image frgb $size $size 3 float
+Image stripes $size $size 1 float
+Image fade $size $size 1 float
+Image sbuf $size $size 1 float
+Image rgb $size $size 3 u_byte
+Image rgb2 $size $size 3 u_byte
+
+Ramp2D frgb{2} 0 255/($size-1) 0 
+Ramp2D frgb{1} 0 0 255/($size-1)
+Convert rgb frgb
+
+VSet rgb{0} 0
+
+Viewer v1 $size $size
+Posn_Window v1 100 50
+Show_The_Panel
+
+Define Demo1 0
+Show_Bytes rgb v1
+.
+
+Define Demo2 0
+VSet rgb{0} 127
+Show_Bytes rgb v1
+.
+
+Define Update_Stripes 0
+VSMul sbuf stripes $r_mod
+VSAdd sbuf sbuf 127
+Convert rgb{2} sbuf
+VSMul sbuf stripes -$g_mod
+VVMul sbuf sbuf fade
+VSAdd sbuf sbuf 127
+Convert rgb{1} sbuf
+VSet rgb{0} 127
+Show_Bytes rgb v1
+.
+
+Ramp2D stripes 0 $twopi/(2*$stripe_width) 0 
+Ramp2D fade 1-$fade_max 0 2*$fade_max/$size
+VSin stripes stripes
+VSMul stripes stripes 1000
+VSMin stripes stripes 1
+VSMax stripes stripes -1
+
+Define Demo3 0
+Update_Stripes
+.
+
+Define Demo4 0
+Show_Flicker
+.
+
+Define Show_Flicker 0
+Init_Flicker
+Play_Flicker
+.
+
+Define Init_Flicker 0
+Print g_mod
+Print r_mod
+VSet rgb{0} 127
+VSet rgb{1} 127+$g_mod
+VSet rgb{2} 127-$r_mod
+
+VSet rgb2{0} 127
+VSet rgb2{1} 127-$g_mod
+VSet rgb2{2} 127+$r_mod
+.
+
+Define Play_Flicker 0
+#view animate v1 1 0 quit
+Set flickering 1
+do
+  Show_Bytes rgb v1
+  usleep $flick_half_period
+#  interface control dispatch quit quit
+  os events quit
+  Show_Bytes rgb2 v1
+  usleep $flick_half_period
+#  interface control dispatch quit quit
+  os events quit
+  while $flickering
+.
+
+Pause
+
+
+exit
+
